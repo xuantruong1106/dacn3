@@ -2,11 +2,13 @@ import 'package:postgres/postgres.dart';
 
 class DatabaseConnection {
 
-  PostgreSQLConnection? _connection;
+  PostgreSQLConnection? connection;
 
   DatabaseConnection() {
-    _connection = PostgreSQLConnection(
-      'localhost',
+    // khi chạy trên windows app: dùng host: localhost
+    // khi chạy trên giả lập: dùng host: 10.0.2.2
+    connection = PostgreSQLConnection(
+      '10.0.2.2',
       5433,
       'dacn3',
       username: 'postgres',
@@ -16,8 +18,8 @@ class DatabaseConnection {
 
   Future<void> connect() async {
     try {
-      if (_connection != null && _connection!.isClosed) {
-        await _connection!.open();
+      if (connection != null && connection!.isClosed) {
+        await connection!.open();
 
         //ignore: avoid_print
         print("Kết nối cơ sở dữ liệu thành công.");
@@ -31,8 +33,8 @@ class DatabaseConnection {
 
   Future<void> close() async {
     try {
-      if (_connection != null && !_connection!.isClosed) {
-        await _connection!.close();
+      if (connection != null && !connection!.isClosed) {
+        await connection!.close();
         //ignore: avoid_print
         print("Kết nối đã được đóng.");
       }
@@ -43,11 +45,11 @@ class DatabaseConnection {
   }
 
   Future<List<List<dynamic>>> executeQuery(String query) async {
-    if (_connection == null || _connection!.isClosed) {
+    if (connection == null || connection!.isClosed) {
       throw Exception("Kết nối chưa được mở.");
     }
     try {
-      return await _connection!.query(query);
+      return await connection!.query(query);
     } catch (e) {
       //ignore: avoid_print
       print("Lỗi khi thực hiện truy vấn: $e");

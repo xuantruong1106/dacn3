@@ -9,14 +9,18 @@ void main(List<String> arguments) async {
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white, // Đặt màu nền trắng cho toàn bộ ứng dụng
+      ),
       home: SafeArea(
         child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            title: Text('Dashboard'),
-          ),
+          backgroundColor: Colors.white,
+          // appBar: AppBar(
+          //   backgroundColor: Colors.white,
+          //   title: Text('Dashboard'),
+          // ),
           body: Center(
-            child: MainApp()
+            child: DashboardInterface()
             ),
           ),
         )
