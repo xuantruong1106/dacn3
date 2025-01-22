@@ -47,7 +47,9 @@ class DashboardState extends State<DashboardInterface> {
     }
   }
 
-  Future? onPressed() {}
+  Future? onPressed() {
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +57,9 @@ class DashboardState extends State<DashboardInterface> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        toolbarHeight: 70.0,
         leading: Container(
-          margin: const EdgeInsets.only(left: 10, top: 15),
+          margin: const EdgeInsets.only(left: 20, top: 15),
           width: 60, // Specify the width of the container
           height: 60,
           child: ClipOval(
@@ -69,18 +72,16 @@ class DashboardState extends State<DashboardInterface> {
           ),
         ),
         title: Padding(
-          padding: const EdgeInsets.only(
-              left: 10.0, top: 10.0, bottom: 5.0), // Add padding
+          padding: const EdgeInsets.only(left: 10.0, top: 10.0, bottom: 5.0),
           child: Row(
             children: [
-              // Column for greeting and username
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Welcome back,",
                     style: TextStyle(
-                      color: const Color.fromARGB(124, 157, 157, 153),
+                      color: const Color.fromARGB(255, 140, 140, 138),
                       fontSize: 14,
                     ),
                   ),
@@ -97,52 +98,153 @@ class DashboardState extends State<DashboardInterface> {
                   ),
                 ],
               ),
-              Spacer(), // This will push the text to the left and the icon to the right
-              Container(
-                decoration: BoxDecoration(
-            color:   Color.fromARGB(205, 220, 219, 219), // Background color for the icon
-            border: Border.all(
-              color:  Color.fromARGB(205, 232, 231, 231), 
-              width: 2, // Border width
-            ),
-            borderRadius: BorderRadius.circular(30), // Rounded corners
-          ),
-              child: IconButton(
-                icon: Icon(Icons.search,),
-                onPressed: () {
-                  onPressed();
-                },
-                 color: const Color.fromARGB(255, 0, 0, 0), 
-              ),
-              )
+              Spacer(),
+              Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Color.fromARGB(205, 220, 219, 219),
+                      border: Border.all(
+                        color: Color.fromARGB(205, 232, 231, 231),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(60),
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.search,
+                      ),
+                      onPressed: () {
+                        onPressed();
+                      },
+                      color: const Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ))
             ],
           ),
         ),
       ),
-
-      // body: isLoading
-      //     ? const Center(child: CircularProgressIndicator())
-      //     : data.isEmpty
-      //         ? const Center(child: Text('No data available'))
-      //         : SingleChildScrollView(
-      //             scrollDirection: Axis.horizontal,
-      //             child: DataTable(
-      //               columns: const [
-      //                 DataColumn(label: Text('Username')),
-      //                 DataColumn(label: Text('Phone')),
-      //                 DataColumn(label: Text('Address')),
-      //               ],
-      //               rows: data.map((row) {
-      //                 return DataRow(
-      //                   cells: [
-      //                     DataCell(Text(row['username'].toString())),
-      //                     DataCell(Text(row['phone'])),
-      //                     DataCell(Text(row['address'])),
-      //                   ],
-      //                 );
-      //               }).toList(),
-      //             ),
-      //           ),
+      
+      body: SafeArea(
+        child: Container(
+          width: 375.0,
+          height: 200.0,
+          decoration: BoxDecoration(
+             gradient: LinearGradient(
+                colors: [Color.fromARGB(255, 18, 22, 37), const Color.fromARGB(255, 52, 25, 105)], // Adjust the colors as needed
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            borderRadius: BorderRadius.circular(20.0)
+          ),
+          margin: const EdgeInsets.only(top: 20.0, left: 20.0),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  child: Icon(
+                    Icons.credit_card,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+                Positioned(
+                  top: 20,
+                  right: 20,
+                  child: Icon(
+                    Icons.contactless,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+                Positioned(
+                  top: 70,
+                  left: 20,
+                  child: Text(
+                    '1234 5678 9012 3456', // Card number
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 110,
+                  left: 20,
+                  child: Text(
+                    'CARDHOLDER NAME', // Cardholder name
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 35,
+                  left: 20,
+                  child: Text(
+                    'Expire day', // Expiration date
+                    style: TextStyle(
+                      color: const Color.fromARGB(255, 205, 203, 203),
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                 Positioned(
+                  bottom: 10,
+                  left: 20,
+                  child: Text(
+                    '12/24', // Expiration date
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 35,
+                  left: 130,
+                  child: Text(
+                    'CVV', // Expiration date
+                    style: TextStyle(
+                      color: const Color.fromARGB(255, 205, 203, 203),
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 10,
+                  left: 130,
+                  child: Text(
+                    '123', // CVV
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 20,
+                  right: 20,
+                  child: Image.network(
+                    'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg',
+                    width: 20,
+                    height: 10,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.error,
+                        color: Colors.red,
+                        size: 40,
+                      );
+                    },
+                  ),
+                ),
+              ],              
+            ), 
+        ),
+      ),
     );
   }
 }
