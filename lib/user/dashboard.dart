@@ -224,7 +224,7 @@ class DashboardState extends State<DashboardInterface> {
                     bottom: 10,
                     right: 30,
                     child: SvgPicture.asset(
-                      "assets/master-card.svg",
+                      "assets/mastercard.svg",
                       width: 70,
                       height: 60,
                       placeholderBuilder: (context) => Icon(

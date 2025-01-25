@@ -12,6 +12,9 @@ dependencies:
   http: ^1.2.2
   postgres: ^2.5.5
   logger: ^1.4.0
+  flutter_svg: ^2.0.17
+  google_fonts: ^6.2.1
+
 
 dev_dependencies:
   flutter_test:
@@ -22,3 +25,4 @@ flutter:
   uses-material-design: true
   assets:
   - assets/avatar.png
+  - assets/mastercard.svg
