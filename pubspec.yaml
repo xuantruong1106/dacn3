@@ -9,9 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.2.2
   postgres: ^2.5.5
-  logger: ^1.4.0
+  logger: ^2.5.0
   flutter_svg: ^2.0.17
   google_fonts: ^6.2.1
 
