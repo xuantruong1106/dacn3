@@ -1,11 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="2.11676in" height="1.5in" viewBox="0 0 152.407 108">
-  <g>
-    <rect width="152.407" height="108" style="fill: none"/>
-    <g>
-      <rect x="60.4117" y="25.6968" width="31.5" height="56.6064" style="fill: #ff5f00"/>
-      <path d="M382.20839,306a35.9375,35.9375,0,0,1,13.7499-28.3032,36,36,0,1,0,0,56.6064A35.938,35.938,0,0,1,382.20839,306Z" transform="translate(-319.79649 -252)" style="fill: #eb001b"/>
-      <path d="M454.20349,306a35.99867,35.99867,0,0,1-58.2452,28.3032,36.00518,36.00518,0,0,0,0-56.6064A35.99867,35.99867,0,0,1,454.20349,306Z" transform="translate(-319.79649 -252)" style="fill: #f79e1b"/>
-      <path d="M450.76889,328.3077v-1.1589h.4673v-.2361h-1.1901v.2361h.4675v1.1589Zm2.3105,0v-1.3973h-.3648l-.41959.9611-.41971-.9611h-.365v1.3973h.2576v-1.054l.3935.9087h.2671l.39351-.911v1.0563Z" transform="translate(-319.79649 -252)" style="fill: #f79e1b"/>
-    </g>
+<?xml version="1.0"?>
+<svg width="999.2" height="776" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" enable-background="new 0 0 999.2 776" version="1.1" xml:space="preserve">
+ <g class="layer">
+  <title>Layer 1</title>
+  <g id="svg_1">
+   <rect fill="#FF5A00" height="291.64" id="rect19" width="155.93" x="431.9" y="178.68"/>
+   <path d="m442.28,324.5c0,-59.25 26.76,-111.84 67.82,-145.82c-30.22,-24.73 -68.33,-39.68 -109.91,-39.68c-98.49,0 -178.19,82.96 -178.19,185.5s79.69,185.5 178.19,185.5c41.58,0 79.69,-14.95 109.91,-39.68c-41.12,-33.5 -67.82,-86.57 -67.82,-145.82z" fill="#EB001B" id="XMLID_330_"/>
+   <path d="m798.2,324.5c0,102.54 -79.69,185.5 -178.19,185.5c-41.58,0 -79.69,-14.95 -109.91,-39.68c41.58,-34.04 67.82,-86.57 67.82,-145.82s-26.76,-111.84 -67.82,-145.82c30.16,-24.73 68.28,-39.68 109.85,-39.68c98.55,0 178.25,83.51 178.25,185.5z" fill="#F79E1B" id="path22"/>
   </g>
+  <text fill="#ffffff" font-family="Serif" font-size="175" id="svg_2" stroke-width="0" text-anchor="middle" transform="matrix(1 0 0 1 0 0)" x="495.8" xml:space="preserve" y="686">Mastercard</text>
+ </g>
 </svg>

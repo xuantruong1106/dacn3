@@ -3,7 +3,7 @@ import 'package:postgres/postgres.dart';
 class DatabaseConnection {
 
   PostgreSQLConnection? connection;
-
+ 
   DatabaseConnection() {
     // khi chạy trên windows app: dùng host: localhost
     // khi chạy trên giả lập: dùng host: 10.0.2.2
