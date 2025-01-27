@@ -156,3 +156,79 @@ EXCEPTION
         RETURN FALSE;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION getTransactions(account_id INT)
+RETURNS TABLE (
+    transaction_id INT,
+    type_transaction INT,
+    transaction_hash VARCHAR,
+    account_receiver VARCHAR,
+    name_receiver VARCHAR,
+    sender_id VARCHAR,
+    sender_name VARCHAR,
+    amount NUMERIC,
+    messages TEXT,
+    timestamps TIMESTAMPTZ,
+    category_id INT,
+    card_id INT,
+    card_number VARCHAR,
+    card_holder_name VARCHAR,
+    account_owner TEXT
+) 
+LANGUAGE sql
+AS $$
+    SELECT 
+        t.id AS transaction_id,
+        t.type_transaction,
+        t.transaction_hash,
+        t.account_receiver,
+        t.name_receiver,
+        t.sender_id,
+        t.sender_name,
+        t.amount,
+        t.messages,
+        t.timestamp,
+        t.category_id,
+        t.card_id,
+        c.card_number,
+        c.card_holder_name,
+        a.username AS account_owner
+    FROM 
+        transactions t
+    INNER JOIN 
+        cards c ON t.card_id = c.id
+    INNER JOIN 
+        accounts a ON c.id_account = a.id
+    WHERE 
+        a.id = account_id;
+$$;
+
+
+CREATE OR REPLACE FUNCTION getUserAndCardInfo(account_id INT)
+RETURNS TABLE (
+    username TEXT,
+    phone TEXT,
+    address TEXT,
+    card_number TEXT,
+    card_holder_name TEXT,
+    total_amount NUMERIC(15, 2)
+) 
+LANGUAGE sql
+AS $$
+    SELECT
+		a.id
+        a.username, 
+        a.phone, 
+        a.address, 
+        c.card_number, 
+        c.card_holder_name, 
+        c.total_amount
+    FROM 
+        accounts a
+    INNER JOIN 
+        cards c ON a.id = c.id_account
+    WHERE 
+        a.id = account_id;
+$$;

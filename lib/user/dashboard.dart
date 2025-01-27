@@ -15,37 +15,80 @@ class DashboardInterface extends StatefulWidget {
 }
 
 class DashboardState extends State<DashboardInterface> {
-  late bool isLoading;
-  late List<Map<String, dynamic>> data;
+  // late bool isLoading;
+  late List<Map<String, dynamic>> dataUser;
+  late List<Map<String, dynamic>> dataTrancsaction;
 
   @override
   void initState() {
     super.initState();
-    isLoading = true;
-    data = [];
-    loadData();
+    // isLoading = true;
+    dataUser = [];
+    dataTrancsaction = [];
+    getInfoUser().then((_) {
+      getInfoTransaction();
+    });
   }
 
-  Future<void> loadData() async {
+  Future<void> getInfoUser() async {
     try {
       await widget.db.connect();
-      final results = await widget.db
-          .executeQuery('SELECT username, phone, address FROM accounts');
+      final results = await widget.db.executeQuery('SELECT * FROM getUserAndCardInfo(@id);',
+        substitutionValues: {
+            'id': 1,
+        });
+
       setState(() {
-        data = results
+        dataUser = results
             .map((row) => {
                   'username': row[0],
                   'phone': row[1],
                   'address': row[2],
+                  'card_number': row[3],
+                  'card_holder_name': row[4],
+                  'total_amount': row[5],
                 })
             .toList();
-        isLoading = false;
       });
     } catch (e) {
+      // ignore: avoid_print
       print('Error: $e');
     } finally {
-      await widget.db.close();
-      print('Connection closed');
+      await widget.db.connection?.close();
+      print('Connection closed for getInfoUser');
+    }
+  }
+
+  Future? getInfoTransaction() async {
+    try {
+      await widget.db.connect();
+
+      // ignore: avoid_print
+      print('Connected to the database');
+
+      final results = await widget.db.executeQuery('SELECT * FROM gettransactions(@id);',
+        substitutionValues: {
+         'id': 1,
+        });
+      
+      setState(() {
+
+        if (dataTrancsaction.isEmpty) {
+          dataTrancsaction = results.map((row) => {
+                  'type_transaction': row[1],
+                  'transaction_hash': row[2],
+                  'card_holder_name': row[13],
+                  'account_owner': row[14],
+          }).toList();
+        }
+      });
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error: $e');
+    } finally {
+      await widget.db.connection?.close();
+      // ignore: avoid_print
+      print('Connection closed for getInfoTransaction');
     }
   }
 
@@ -85,7 +128,7 @@ class DashboardState extends State<DashboardInterface> {
                     style: GoogleFonts.roboto(textStyle: TextStyle(fontSize: 16,color: Colors.grey)),
                   ),
                   Text(
-                    '${data[0]['username']}',
+                    "${dataUser[0]['username']}",
                     style: GoogleFonts.roboto(textStyle: TextStyle(fontSize: 20,color: Colors.black)),
                   ),
                 ],
@@ -157,7 +200,7 @@ class DashboardState extends State<DashboardInterface> {
                     top: 70,
                     left: 20,
                     child: Text(
-                      '1234 5678 9012 3456', // Card number
+                      "${dataUser[0]['card_number']}", // Card number
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -169,7 +212,7 @@ class DashboardState extends State<DashboardInterface> {
                     top: 110,
                     left: 20,
                     child: Text(
-                      '${data[0]['username']}', // Cardholder name
+                      "${dataUser[0]['card_holder_name']}", // Cardholder name
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -320,6 +363,37 @@ class DashboardState extends State<DashboardInterface> {
                 ],
               ),     
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0, left: 20.0),
+              child: Row(
+                children: [
+                  Text(
+                    'Account',
+                    style: GoogleFonts.roboto(
+                      textStyle: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ),
+                  Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: dataTrancsaction.isNotEmpty
+                        ? Text(
+                            '${dataTrancsaction[0]['account_owner']}',
+                            style: GoogleFonts.roboto(
+                              textStyle: TextStyle(fontSize: 16, color: Color(0xFF0066FF)),
+                            ),
+                          )
+                        : Text(
+                            "No Data",
+                            style: GoogleFonts.roboto(
+                              textStyle: TextStyle(fontSize: 16, color: Colors.red),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            )
+            ,
           ],
         ),
       ),
