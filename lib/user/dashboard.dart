@@ -33,10 +33,11 @@ class DashboardState extends State<DashboardInterface> {
   Future<void> getInfoUser() async {
     try {
       await widget.db.connect();
-      final results = await widget.db.executeQuery('SELECT * FROM getUserAndCardInfo(@id);',
-        substitutionValues: {
+      final results = await widget.db.executeQuery(
+          'SELECT * FROM get_user_and_card_info(@id);',
+          substitutionValues: {
             'id': 1,
-        });
+          });
 
       setState(() {
         dataUser = results
@@ -66,20 +67,22 @@ class DashboardState extends State<DashboardInterface> {
       // ignore: avoid_print
       print('Connected to the database');
 
-      final results = await widget.db.executeQuery('SELECT * FROM gettransactions(@id);',
-        substitutionValues: {
-         'id': 1,
-        });
-      
-      setState(() {
+      final results = await widget.db.executeQuery(
+          'SELECT * FROM get_basic_transaction_info(@id);',
+          substitutionValues: {
+            'id': 1,
+          });
 
+      setState(() {
         if (dataTrancsaction.isEmpty) {
-          dataTrancsaction = results.map((row) => {
-                  'type_transaction': row[1],
-                  'transaction_hash': row[2],
-                  'card_holder_name': row[13],
-                  'account_owner': row[14],
-          }).toList();
+          dataTrancsaction = results
+              .map((row) => {
+                    'type_transaction': row[1],
+                    'transaction_amount': row[2],
+                    'category_name': row[3],
+                    'icon': row[4],
+                  })
+              .toList();
         }
       });
     } catch (e) {
@@ -125,11 +128,14 @@ class DashboardState extends State<DashboardInterface> {
                 children: [
                   Text(
                     'Welcome,',
-                    style: GoogleFonts.roboto(textStyle: TextStyle(fontSize: 16,color: Colors.grey)),
+                    style: GoogleFonts.roboto(
+                        textStyle: TextStyle(fontSize: 16, color: Colors.grey)),
                   ),
                   Text(
                     "${dataUser[0]['username']}",
-                    style: GoogleFonts.roboto(textStyle: TextStyle(fontSize: 20,color: Colors.black)),
+                    style: GoogleFonts.roboto(
+                        textStyle:
+                            TextStyle(fontSize: 20, color: Colors.black)),
                   ),
                 ],
               ),
@@ -296,12 +302,22 @@ class DashboardState extends State<DashboardInterface> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            border: Border.all(color: Color.fromARGB(205, 232, 231, 231), width: 1),
+                            border: Border.all(
+                                color: Color.fromARGB(205, 232, 231, 231),
+                                width: 1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding: const EdgeInsets.all(8.0),
-                          child: Icon(Icons.attach_money,
-                              size: 40, color: Colors.black),
+                          child: SvgPicture.asset(
+                            "assets/sent.svg",
+                            width: 50,
+                            height: 30,
+                            placeholderBuilder: (context) => Icon(
+                              Icons.error,
+                              color: Colors.red,
+                              size: 30,
+                            ),
+                          ),
                         ),
                         Text('Sent', style: TextStyle(color: Colors.black)),
                       ],
@@ -311,12 +327,22 @@ class DashboardState extends State<DashboardInterface> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            border: Border.all(color: Color.fromARGB(205, 232, 231, 231), width: 1),
+                            border: Border.all(
+                                color: Color.fromARGB(205, 232, 231, 231),
+                                width: 1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding: const EdgeInsets.all(8.0),
-                          child: Icon(Icons.money_off,
-                              size: 40, color: Colors.black),
+                          child: SvgPicture.asset(
+                            "assets/receive.svg",
+                            width: 50,
+                            height: 30,
+                            placeholderBuilder: (context) => Icon(
+                              Icons.error,
+                              color: Colors.red,
+                              size: 30,
+                            ),
+                          ),
                         ),
                         Text('Receive', style: TextStyle(color: Colors.black)),
                       ],
@@ -326,12 +352,22 @@ class DashboardState extends State<DashboardInterface> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            border: Border.all(color: Color.fromARGB(205, 232, 231, 231), width: 1),
+                            border: Border.all(
+                                color: Color.fromARGB(205, 232, 231, 231),
+                                width: 1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding: const EdgeInsets.all(8.0),
-                          child: Icon(Icons.account_balance,
-                              size: 40, color: Colors.black),
+                          child: SvgPicture.asset(
+                            "assets/loan.svg",
+                            width: 50,
+                            height: 30,
+                            placeholderBuilder: (context) => Icon(
+                              Icons.error,
+                              color: Colors.red,
+                              size: 30,
+                            ),
+                          ),
                         ),
                         Text('Loan', style: TextStyle(color: Colors.black)),
                       ],
@@ -351,49 +387,96 @@ class DashboardState extends State<DashboardInterface> {
                     ),
                   ),
                   Spacer(),
-                  Padding(padding: const EdgeInsets.only(right: 20.0),
-                  child: Text(
-                    'Sell All',
-                    style: GoogleFonts.roboto(
-                      textStyle: TextStyle(fontSize: 16, color:  Color(0xFF0066FF)),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: Text(
+                      'Sell All',
+                      style: GoogleFonts.roboto(
+                        textStyle:
+                            TextStyle(fontSize: 16, color: Color(0xFF0066FF)),
+                      ),
                     ),
-                  ),
                   )
-                  
                 ],
-              ),     
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 10.0, left: 20.0),
               child: Row(
                 children: [
                   Text(
-                    'Account',
+                    '${dataTrancsaction[0]['icon']}',
                     style: GoogleFonts.roboto(
-                      textStyle: TextStyle(fontSize: 16, color: Colors.grey),
+                      textStyle: TextStyle(fontSize: 40, color: Colors.black),
                     ),
                   ),
+                  Padding(
+                      padding: const EdgeInsets.only(top: 5.0, left: 10.0),
+                      child: Row(
+                        children: [
+                          dataTrancsaction.isNotEmpty
+                              ? Text(
+                                  '${dataTrancsaction[0]['category_name']}',
+                                  style: GoogleFonts.roboto(
+                                    textStyle: TextStyle(
+                                        fontSize: 20, color: Colors.black),
+                                  ),
+                                )
+                              : Text(
+                                  "No Data",
+                                  style: GoogleFonts.roboto(
+                                    textStyle: TextStyle(
+                                        fontSize: 16, color: Colors.red),
+                                  ),
+                                ),
+                        ],
+                      )),
                   Spacer(),
                   Padding(
-                    padding: const EdgeInsets.only(right: 20.0),
-                    child: dataTrancsaction.isNotEmpty
-                        ? Text(
-                            '${dataTrancsaction[0]['account_owner']}',
+                    padding: const EdgeInsets.only(right: 2.0),
+                    child: Row(
+                      children: [
+                        dataTrancsaction[0]['type_transaction'] == 0
+                            ? SvgPicture.asset(
+                                "assets/sent1.svg",
+                                width: 50,
+                                height: 20,
+                                placeholderBuilder: (context) => Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                  size: 30,
+                                ),
+                              )
+                            : SvgPicture.asset(
+                                "assets/sent2.svg",
+                                width: 50,
+                                height: 20,
+                                placeholderBuilder: (context) => Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                  size: 30,
+                                ),
+                              ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 20.0, left: 2.0),
+                          child: Text(
+                            '${dataTrancsaction[0]['transaction_amount']}',
                             style: GoogleFonts.roboto(
-                              textStyle: TextStyle(fontSize: 16, color: Color(0xFF0066FF)),
-                            ),
-                          )
-                        : Text(
-                            "No Data",
-                            style: GoogleFonts.roboto(
-                              textStyle: TextStyle(fontSize: 16, color: Colors.red),
+                              textStyle: TextStyle(
+                                fontSize: 18,
+                                color: dataTrancsaction[0]['type_transaction'] == 0
+                                    ? Colors.black
+                                    : Color(0xFF0066FF),
+                              ),
                             ),
                           ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            )
-            ,
+            ),
           ],
         ),
       ),

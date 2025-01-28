@@ -25,3 +25,8 @@ flutter:
   assets:
   - assets/avatar.png
   - assets/mastercard.svg
+  - assets/sent.svg
+  - assets/receive.svg
+  - assets/loan.svg
+  - assets/sent2.svg
+  - assets/sent1.svg

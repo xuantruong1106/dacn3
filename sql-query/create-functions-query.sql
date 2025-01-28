@@ -1,7 +1,7 @@
 -- ====================
 -- Function: showCategory
 -- ====================
-CREATE OR REPLACE FUNCTION showCategory(id_card INT)
+CREATE OR REPLACE FUNCTION show_category(id_card INT)
 RETURNS TABLE(
     id INT,
     type_category INT,
@@ -23,7 +23,7 @@ $$ LANGUAGE plpgsql;
 -- ====================
 -- Function: getNameCategory
 -- ====================
-CREATE OR REPLACE FUNCTION getNameCategory(id_category INT)
+CREATE OR REPLACE FUNCTION get_name_category(id_category INT)
 RETURNS TEXT AS $$
 DECLARE
     category_name TEXT;
@@ -62,7 +62,7 @@ $$ LANGUAGE plpgsql;
 -- ====================
 -- Function: updateBalanceAfterTransaction
 -- ====================
-CREATE OR REPLACE FUNCTION updateBalanceAfterTransaction(card_id INT, amount NUMERIC)
+CREATE OR REPLACE FUNCTION update_blance_after_transaction(card_id INT, amount NUMERIC)
 RETURNS BOOLEAN AS $$
 BEGIN
     UPDATE cards
@@ -81,7 +81,7 @@ $$ LANGUAGE plpgsql;
 -- ====================
 -- Function: sendNotification
 -- ====================
-CREATE OR REPLACE FUNCTION sendNotification(id_account INT, message TEXT)
+CREATE OR REPLACE FUNCTION send_notification(id_account INT, message TEXT)
 RETURNS VOID AS $$
 BEGIN
     INSERT INTO notifications (id_account, message, sent_at)
@@ -92,7 +92,7 @@ $$ LANGUAGE plpgsql;
 -- ====================
 -- Function: getNotifications
 -- ====================
-CREATE OR REPLACE FUNCTION getNotifications(id_account INT)
+CREATE OR REPLACE FUNCTION get_notifications(id_account INT)
 RETURNS TABLE(
     id INT,
     message TEXT,
@@ -110,7 +110,7 @@ $$ LANGUAGE plpgsql;
 -- ====================
 -- Function: deleteNotification
 -- ====================
-CREATE OR REPLACE FUNCTION deleteNotification(notificationId INT)
+CREATE OR REPLACE FUNCTION delete_notification(notificationId INT)
 RETURNS BOOLEAN AS $$
 BEGIN
     DELETE FROM notifications
@@ -159,7 +159,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE OR REPLACE FUNCTION getTransactions(account_id INT)
+CREATE OR REPLACE FUNCTION get_transactions(account_id INT)
 RETURNS TABLE (
     transaction_id INT,
     type_transaction INT,
@@ -206,7 +206,7 @@ AS $$
 $$;
 
 
-CREATE OR REPLACE FUNCTION getUserAndCardInfo(account_id INT)
+CREATE OR REPLACE FUNCTION get_user_and_card_info(account_id INT)
 RETURNS TABLE (
     username TEXT,
     phone TEXT,
@@ -232,3 +232,38 @@ AS $$
     WHERE 
         a.id = account_id;
 $$;
+
+
+CREATE OR REPLACE FUNCTION get_basic_transaction_info(
+    account_id INT
+)
+RETURNS TABLE(
+    transaction_id INT,
+    type_transaction TEXT,
+    transaction_amount NUMERIC(10, 2),
+    category_name TEXT,
+	icon TEXT,
+    message TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        t.id AS transaction_id,
+        CASE t.type_transaction
+            WHEN 0 THEN 'Income'
+            WHEN 1 THEN 'Expense'
+        END AS type_transaction,
+        t.amount AS transaction_amount,
+        c.name_category AS category_name,
+		c.icon AS icon,
+        t.messages AS message
+    FROM 
+        transactions t
+    LEFT JOIN 
+        categories c ON t.category_id = c.id
+    INNER JOIN 
+        cards ca ON t.card_id = ca.id
+    WHERE 
+        ca.id_account = account_id; -- Chỉ lấy giao dịch thuộc tài khoản được chỉ định
+END;
+$$ LANGUAGE plpgsql;
