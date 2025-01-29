@@ -1,5 +1,5 @@
 
-import '/user/dashboard.dart';
+import 'package:dacn3/screens/user/dashboard.dart';
 import 'package:flutter/material.dart';
 
 void main(List<String> arguments) async {

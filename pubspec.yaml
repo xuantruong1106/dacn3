@@ -13,6 +13,7 @@ dependencies:
   logger: ^2.5.0
   flutter_svg: ^2.0.17
   google_fonts: ^6.2.1
+  fl_chart: ^0.70.2
 
 
 dev_dependencies:
@@ -30,3 +31,9 @@ flutter:
   - assets/loan.svg
   - assets/sent2.svg
   - assets/sent1.svg
+  - assets/logo_app.png
+  - assets/splash_img.png
+  - assets/splash_imgg.png
+  - assets/splash_imggg.png
+  - assets/card.png
+  - assets/avatar_app.png

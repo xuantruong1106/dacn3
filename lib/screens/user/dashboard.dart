@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../database_connect.dart';
+import 'package:dacn3/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class DashboardInterface extends StatefulWidget {
