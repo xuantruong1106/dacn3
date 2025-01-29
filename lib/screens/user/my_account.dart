@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyCardsScreen extends StatefulWidget {
-  const MyCardsScreen({Key? key}) : super(key: key);
+  const MyCardsScreen({super.key});
 
   @override
   State<MyCardsScreen> createState() => _MyCardsScreenState();
@@ -189,28 +189,6 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.credit_card),
-            label: 'My Cards',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_outlined),
-            label: 'Statistics',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            label: 'Settings',
           ),
         ],
       ),

@@ -3,18 +3,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dacn3/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class DashboardInterface extends StatefulWidget {
-  DashboardInterface({super.key});
+class Home2 extends StatefulWidget {
+  Home2({super.key});
 
   final db = DatabaseConnection();
 
   @override
   State<StatefulWidget> createState() {
-    return DashboardState();
+    return Home2State();
   }
 }
 
-class DashboardState extends State<DashboardInterface> {
+class Home2State extends State<Home2> {
   // late bool isLoading;
   late List<Map<String, dynamic>> dataUser;
   late List<Map<String, dynamic>> dataTrancsaction;
@@ -56,6 +56,7 @@ class DashboardState extends State<DashboardInterface> {
       print('Error: $e');
     } finally {
       await widget.db.connection?.close();
+      // ignore: avoid_print
       print('Connection closed for getInfoUser');
     }
   }
@@ -108,14 +109,12 @@ class DashboardState extends State<DashboardInterface> {
         toolbarHeight: 70.0,
         leading: Container(
           margin: const EdgeInsets.only(left: 20, top: 15),
-          width: 60, // Specify the width of the container
+          width: 60,
           height: 60,
-          child: ClipOval(
+          child: CircleAvatar(
+            radius: 30,
             child: Image.asset(
               "assets/avatar.png",
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
             ),
           ),
         ),
@@ -286,94 +285,17 @@ class DashboardState extends State<DashboardInterface> {
                 ],
               ),
             ),
-            // Options Section
+             // Action Buttons
             Padding(
-              padding: const EdgeInsets.only(
-                  top: 20.0), // Space between the sections
-              child: Container(
-                width: 375.0,
-                height: 100.0,
-                color: Colors.white,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: Color.fromARGB(205, 232, 231, 231),
-                                width: 1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            "assets/sent.svg",
-                            width: 50,
-                            height: 30,
-                            placeholderBuilder: (context) => Icon(
-                              Icons.error,
-                              color: Colors.red,
-                              size: 30,
-                            ),
-                          ),
-                        ),
-                        Text('Sent', style: TextStyle(color: Colors.black)),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: Color.fromARGB(205, 232, 231, 231),
-                                width: 1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            "assets/receive.svg",
-                            width: 50,
-                            height: 30,
-                            placeholderBuilder: (context) => Icon(
-                              Icons.error,
-                              color: Colors.red,
-                              size: 30,
-                            ),
-                          ),
-                        ),
-                        Text('Receive', style: TextStyle(color: Colors.black)),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: Color.fromARGB(205, 232, 231, 231),
-                                width: 1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            "assets/loan.svg",
-                            width: 50,
-                            height: 30,
-                            placeholderBuilder: (context) => Icon(
-                              Icons.error,
-                              color: Colors.red,
-                              size: 30,
-                            ),
-                          ),
-                        ),
-                        Text('Loan', style: TextStyle(color: Colors.black)),
-                      ],
-                    ),
-                  ],
-                ),
+              padding: const EdgeInsets.only(top: 20.0, left: 32.0, right: 32.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildActionButton(Icons.arrow_upward, 'Sent'),
+                  _buildActionButton(Icons.arrow_downward, 'Receive'),
+                  _buildActionButton(Icons.attach_money, 'Loan'),
+                  _buildActionButton(Icons.add, 'Topup'),
+                ],
               ),
             ),
             Padding(
@@ -437,30 +359,24 @@ class DashboardState extends State<DashboardInterface> {
                     child: Row(
                       children: [
                         dataTrancsaction[0]['type_transaction'] == 0
-                            ? SvgPicture.asset(
-                                "assets/sent1.svg",
-                                width: 50,
-                                height: 20,
-                                placeholderBuilder: (context) => Icon(
-                                  Icons.error,
-                                  color: Colors.red,
-                                  size: 30,
-                                ),
-                              )
-                            : SvgPicture.asset(
-                                "assets/sent2.svg",
-                                width: 50,
-                                height: 20,
-                                placeholderBuilder: (context) => Icon(
-                                  Icons.error,
-                                  color: Colors.red,
-                                  size: 30,
-                                ),
-                              ),
-                        Padding(
+                            ? Padding(
                           padding: const EdgeInsets.only(right: 20.0, left: 2.0),
                           child: Text(
-                            '${dataTrancsaction[0]['transaction_amount']}',
+                            '\$${dataTrancsaction[0]['transaction_amount']}',
+                            style: GoogleFonts.roboto(
+                              textStyle: TextStyle(
+                                fontSize: 18,
+                                color: dataTrancsaction[0]['type_transaction'] == 0
+                                    ? Colors.black
+                                    : Color(0xFF0066FF),
+                              ),
+                            ),
+                          ),
+                        )
+                            : Padding(
+                          padding: const EdgeInsets.only(right: 20.0, left: 2.0),
+                          child: Text(
+                            '-\$${dataTrancsaction[0]['transaction_amount']}',
                             style: GoogleFonts.roboto(
                               textStyle: TextStyle(
                                 fontSize: 18,
@@ -482,4 +398,29 @@ class DashboardState extends State<DashboardInterface> {
       ),
     );
   }
+
+  Widget _buildActionButton(IconData icon, String label) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: Colors.black),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+

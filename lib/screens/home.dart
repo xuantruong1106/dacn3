@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  HomeScreen({super.key});
+  @override
+  // ignore: library_private_types_in_public_api
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late List<Map<String, dynamic>> dataUser;
+  late List<Map<String, dynamic>> dataTrancsaction;
+
+  @override
+   void initState() {
+    super.initState();
+    // isLoading = true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,30 +38,24 @@ class HomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
                       Text(
-                        'Welcome back,',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        'dennis nzioki',
+                        'Welcome',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      Text(
+                        'Good to see you!',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ],
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {},
                   ),
                 ],
               ),
             ),
-
             // Credit Card
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -197,30 +204,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-
-            // Bottom Navigation
-            BottomNavigationBar(
-              currentIndex: 0,
-              type: BottomNavigationBarType.fixed,
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.credit_card),
-                  label: 'My Cards',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.bar_chart),
-                  label: 'Statistics',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.settings),
-                  label: 'Settings',
-                ),
-              ],
             ),
           ],
         ),
