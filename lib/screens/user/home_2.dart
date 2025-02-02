@@ -86,6 +86,8 @@ class Home2State extends State<Home2> {
               .toList();
         }
       });
+      // ignore: avoid_print
+      print(dataTrancsaction);
     } catch (e) {
       // ignore: avoid_print
       print('Error: $e');
@@ -285,9 +287,10 @@ class Home2State extends State<Home2> {
                 ],
               ),
             ),
-             // Action Buttons
+            // Action Buttons
             Padding(
-              padding: const EdgeInsets.only(top: 20.0, left: 32.0, right: 32.0),
+              padding:
+                  const EdgeInsets.only(top: 20.0, left: 32.0, right: 32.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -322,75 +325,92 @@ class Home2State extends State<Home2> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 10.0, left: 20.0),
-              child: Row(
-                children: [
-                  Text(
-                    '${dataTrancsaction[0]['icon']}',
-                    style: GoogleFonts.roboto(
-                      textStyle: TextStyle(fontSize: 40, color: Colors.black),
+            // Transactions List
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(20.0),
+                itemCount: dataTrancsaction.length,
+                itemBuilder: (context, index) {
+                  return  Padding(
+                padding: const EdgeInsets.only(top: 10.0, left: 20.0),
+                child: Row(
+                  children: [
+                     // display category name
+                    Text(
+                      '${dataTrancsaction[index]['icon']}',
+                      style: GoogleFonts.roboto(
+                        textStyle: TextStyle(fontSize: 40, color: Colors.black),
+                      ),
                     ),
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.only(top: 5.0, left: 10.0),
-                      child: Row(
-                        children: [
-                          dataTrancsaction.isNotEmpty
-                              ? Text(
-                                  '${dataTrancsaction[0]['category_name']}',
-                                  style: GoogleFonts.roboto(
-                                    textStyle: TextStyle(
-                                        fontSize: 20, color: Colors.black),
+                    Padding(
+                        padding: const EdgeInsets.only(top: 5.0, left: 10.0),
+                        child: Row(
+                          children: [
+                            dataTrancsaction.isNotEmpty
+                                ? Text(
+                                    '${dataTrancsaction[index]['category_name']}',
+                                    style: GoogleFonts.roboto(
+                                      textStyle: TextStyle(
+                                          fontSize: 20, color: Colors.black),
+                                    ),
+                                  )
+                                : Text(
+                                    "No Data",
+                                    style: GoogleFonts.roboto(
+                                      textStyle: TextStyle(
+                                          fontSize: 16, color: Colors.red),
+                                    ),
                                   ),
-                                )
-                              : Text(
-                                  "No Data",
-                                  style: GoogleFonts.roboto(
-                                    textStyle: TextStyle(
-                                        fontSize: 16, color: Colors.red),
-                                  ),
-                                ),
-                        ],
-                      )),
-                  Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 2.0),
-                    child: Row(
-                      children: [
-                        dataTrancsaction[0]['type_transaction'] == 0
-                            ? Padding(
-                          padding: const EdgeInsets.only(right: 20.0, left: 2.0),
-                          child: Text(
-                            '\$${dataTrancsaction[0]['transaction_amount']}',
-                            style: GoogleFonts.roboto(
-                              textStyle: TextStyle(
-                                fontSize: 18,
-                                color: dataTrancsaction[0]['type_transaction'] == 0
-                                    ? Colors.black
-                                    : Color(0xFF0066FF),
-                              ),
-                            ),
-                          ),
-                        )
-                            : Padding(
-                          padding: const EdgeInsets.only(right: 20.0, left: 2.0),
-                          child: Text(
-                            '-\$${dataTrancsaction[0]['transaction_amount']}',
-                            style: GoogleFonts.roboto(
-                              textStyle: TextStyle(
-                                fontSize: 18,
-                                color: dataTrancsaction[0]['type_transaction'] == 0
-                                    ? Colors.black
-                                    : Color(0xFF0066FF),
-                              ),
-                            ),
+                          ],
+                        )),
+                    Spacer(),
+                    // 0: income, 1: expense
+                    Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Row(
+                            children: [
+                              dataTrancsaction[index]['type_transaction'] == 0
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 20.0, left: 2.0),
+                                      child: Text(
+                                        '\$${dataTrancsaction[index]['transaction_amount']}',
+                                        style: GoogleFonts.roboto(
+                                          textStyle: TextStyle(
+                                            fontSize: 18,
+                                            color: dataTrancsaction[0]
+                                                        ['type_transaction'] ==
+                                                    0
+                                                ? Colors.black
+                                                : Color(0xFF0066FF),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 20.0, left: 2.0),
+                                      child: Text(
+                                        '-\$${dataTrancsaction[index]['transaction_amount']}',
+                                        style: GoogleFonts.roboto(
+                                          textStyle: TextStyle(
+                                            fontSize: 18,
+                                            color: dataTrancsaction[index]
+                                                        ['type_transaction'] ==
+                                                    0
+                                                ? Colors.black
+                                                : Color(0xFF0066FF),
+                                           ),
+                                        ),
+                                      ),
+                                    ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ],
@@ -422,5 +442,3 @@ class Home2State extends State<Home2> {
     );
   }
 }
-
-
