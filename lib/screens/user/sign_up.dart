@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:dacn3/database_connect.dart';
+import 'package:dacn3/random_cvv_card_numbrer/utils.dart'; 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
-
+  SignUpScreen({super.key});
+  final db = DatabaseConnection();
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
@@ -12,16 +13,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isPasswordVisible = false;
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _addressController = TextEditingController();
   final _passwordController = TextEditingController();
+  
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _emailController.dispose();
+    _addressController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<bool> _registerUser(String name, String password, String cardNumber, String cvv, String phone, String address) async {
+    try {
+      await widget.db.connect();
+      final results = await widget.db.executeQuery(
+        'select * create_account_and_card(@name, @password, @card_number, @card_holder_name, @cvv, @phone, @address);',
+        substitutionValues: {
+          'name': name,
+          'password': password,
+          'card_number': cardNumber, 
+          'card_holder_name': name, 
+          'cvv': cvv,
+          'phone': phone,
+          'address': address,
+        },
+      );
+
+      if (results.isNotEmpty) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error: $e');
+      return false;
+    } finally {
+      await widget.db.connection?.close();
+    }
+  }
+
+  Future<void> _signUp() async {
+    final name = _nameController.text;
+    final phone = _phoneController.text;
+    final address = _addressController.text;
+    final password = _passwordController.text;
+    final cardNumber = generateRandomCardNumber(); //
+    final cvv = generateRandomCVV(); 
+
+    final isRegistered = await _registerUser(name, password, cardNumber, cvv, phone, address);
+    if (!mounted) return;
+
+    if (isRegistered) {
+      Navigator.pushReplacementNamed(context, '/sign_in');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Registration failed. Please try again.')),
+      );
+    }
   }
 
   @override
@@ -120,12 +172,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    controller: _addressController,
+                    keyboardType: TextInputType.streetAddress,
                     decoration: InputDecoration(
-                      hintText: 'denniszioki@gmail.com',
+                      hintText: 'Dang Nang',
                       hintStyle: TextStyle(color: Colors.grey.shade400),
-                      prefixIcon: Icon(Icons.email_outlined, color: Colors.grey.shade400),
+                      prefixIcon: Icon(Icons.streetview_outlined, color: Colors.grey.shade400),
                       border: InputBorder.none,
                       filled: true,
                       fillColor: Colors.grey.shade50,
@@ -175,9 +227,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Handle sign up logic
-                  },
+                  onPressed: _signUp,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0066FF),
                     shape: RoundedRectangleBorder(

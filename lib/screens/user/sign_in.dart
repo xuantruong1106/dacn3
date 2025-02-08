@@ -1,8 +1,12 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:dacn3/database_connect.dart';
 import 'package:flutter/services.dart';
 
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+  SignInScreen({super.key});
+
+  final db = DatabaseConnection();
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -10,14 +14,56 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   bool _isPasswordVisible = false;
-  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  int? _userId;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<bool> _checkUserAccount(String phone, String password) async {
+    try {
+      await widget.db.connect();
+      final results = await widget.db.executeQuery(
+        'select * from check_account_credentials(@phone, @password);',
+        substitutionValues: {
+          'phone': phone,
+          'password': password,
+        },
+      );
+
+      if (results.isNotEmpty) {
+        _userId = results[0][0]; // Lưu trữ ID người dùng
+        return true;
+      }
+      return false;
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error: $e');
+      return false;
+    } finally {
+      await widget.db.connection?.close();
+    }
+  }
+
+  Future<void> _signIn() async {
+    final phone = _phoneController.text;
+    final password = _passwordController.text;
+
+    final isValidUser = await _checkUserAccount(phone, password);
+    if (!mounted) return;
+
+    if (isValidUser) {
+      Navigator.pushReplacementNamed(context, '/main', arguments: _userId);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Invalid phone number or password')),
+      );
+    }
   }
 
   @override
@@ -50,12 +96,12 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              // Email Field
+              // Phone Field
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Email Address',
+                    'Phone Number',
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 14,
@@ -63,12 +109,12 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
-                      hintText: 'denninszioki@gmail.com',
+                      hintText: '0123456789',
                       hintStyle: TextStyle(color: Colors.grey.shade400),
-                      prefixIcon: Icon(Icons.email_outlined, color: Colors.grey.shade400),
+                      prefixIcon: Icon(Icons.phone, color: Colors.grey.shade400),
                       border: InputBorder.none,
                       filled: true,
                       fillColor: Colors.grey.shade50,
@@ -118,9 +164,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Handle sign in logic
-                  },
+                  onPressed: _signIn,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0066FF),
                     shape: RoundedRectangleBorder(
@@ -132,6 +176,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: Colors.white
                     ),
                   ),
                 ),
@@ -146,13 +191,17 @@ class _SignInScreenState extends State<SignInScreen> {
                       color: Colors.grey.shade600,
                       fontSize: 14,
                     ),
-                    children: const [
+                    children: [
                       TextSpan(
-                        text: 'Sign In',
-                        style: TextStyle(
+                        text: 'Sign Up',
+                        style: const TextStyle(
                           color: Color(0xFF0066FF),
                           fontWeight: FontWeight.w600,
                         ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.pushNamed(context, '/sign_up');
+                          },
                       ),
                     ],
                   ),

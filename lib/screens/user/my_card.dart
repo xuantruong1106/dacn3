@@ -3,7 +3,9 @@ import 'package:dacn3/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class MyCardsScreen extends StatefulWidget {
-  MyCardsScreen({super.key});
+  final int userId;
+  MyCardsScreen({super.key, required this.userId});
+
   final db = DatabaseConnection();
   @override
   State<MyCardsScreen> createState() => _MyCardsScreenState();
@@ -25,7 +27,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
       final results = await widget.db.executeQuery(
           'SELECT * FROM get_user_and_card_info(@id);',
           substitutionValues: {
-            'id': 1,
+            'id': widget.userId,
           });
 
       setState(() {
@@ -36,7 +38,9 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                   'address': row[2],
                   'card_number': row[3],
                   'card_holder_name': row[4],
-                  'total_amount': row[5],
+                  'cvv': row[5],
+                  'expiration_date': row[6].toString().substring(0, 10).split('-').reversed.join('/'),
+                  'total_amount': row[7],
                 })
             .toList();
       });
@@ -148,7 +152,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                     bottom: 10,
                     left: 20,
                     child: Text(
-                      '12/24', // Expiration date
+                      "${dataUser[0]['expiration_date']}", // Expiration date
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -170,7 +174,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                     bottom: 10,
                     left: 130,
                     child: Text(
-                      '123', // CVV
+                      "${dataUser[0]['cvv']}", // CVV
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -250,6 +254,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                     activeTrackColor: Colors.blue,
                     inactiveTrackColor: Colors.grey.shade200,
                     thumbColor: Colors.blue,
+                    // ignore: deprecated_member_use
                     overlayColor: Colors.blue.withOpacity(0.1),
                   ),
                   child: Slider(

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dacn3/screens/user/statistics.dart';
-import 'package:dacn3/screens/user/settings.dart';
-import 'package:dacn3/screens/user/my_card.dart';
-import 'package:dacn3/screens/user/home_2.dart';
+import 'package:dacn3/screens/user/sign_in.dart';
+import 'package:dacn3/router.dart';
 
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,8 +12,10 @@ void main(List<String> arguments) async {
         scaffoldBackgroundColor: Colors.white,
       ),
       home: SafeArea(
-        child: MainScreen(),
+        child: SignInScreen(),
       ),
+      initialRoute: '/',
+      onGenerateRoute: AppRouter.generateRoute,
     ),
   );
 }
@@ -29,50 +29,12 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
-
-  static final List<Widget> _widgetOptions = <Widget>[
-    Home2(),
-    MyCardsScreen(),
-    StatisticsScreen(),
-    SettingsScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      // Bottom Navigation
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.credit_card),
-            label: 'My Cards',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Statistics',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        onTap: _onItemTapped,
+        child: SignInScreen()
       ),
     );
   }

@@ -213,17 +213,20 @@ RETURNS TABLE (
     address TEXT,
     card_number TEXT,
     card_holder_name TEXT,
+    cvv TEXT,
+    expiration_date TIMESTAMP,
     total_amount NUMERIC(15, 2)
 ) 
 LANGUAGE sql
 AS $$
     SELECT
-		a.id
         a.username, 
         a.phone, 
         a.address, 
         c.card_number, 
         c.card_holder_name, 
+        c.cvv,
+        c.expiration_date,
         c.total_amount
     FROM 
         accounts a
@@ -232,7 +235,6 @@ AS $$
     WHERE 
         a.id = account_id;
 $$;
-
 
 CREATE OR REPLACE FUNCTION get_basic_transaction_info(
     account_id INT
@@ -267,3 +269,91 @@ BEGIN
         ca.id_account = account_id; -- Chỉ lấy giao dịch thuộc tài khoản được chỉ định
 END;
 $$ LANGUAGE plpgsql;
+
+-- function check account with parameter is phone and pwd
+
+CREATE OR REPLACE FUNCTION check_account_credentials(
+    input_phone TEXT,
+    input_password TEXT
+) 
+RETURNS INT AS $$
+DECLARE
+    account_id INT;
+BEGIN
+    -- Tìm ID của tài khoản nếu phone và password hợp lệ
+    SELECT id INTO account_id
+    FROM accounts 
+    WHERE phone = input_phone 
+      AND passwd = crypt(input_password, passwd);
+
+    -- Trả về ID nếu tìm thấy, nếu không có thì trả về NULL
+    RETURN account_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- create_account_and_card
+CREATE OR REPLACE FUNCTION create_account_and_card(
+    p_username TEXT,
+    p_password TEXT,
+    p_card_number TEXT,
+    p_card_holder_name TEXT,
+    p_cvv TEXT,
+	p_phone TEXT,
+    p_address TEXT,
+    p_creator INT DEFAULT 0,
+    p_pin TEXT DEFAULT NULL,
+    p_total_amount NUMERIC(15, 2) DEFAULT 0.00
+) 
+RETURNS BOOLEAN AS $$ 
+DECLARE
+    new_account_id INT;
+    hashed_password TEXT;
+    encrypted_pin TEXT;
+BEGIN
+    -- Kiểm tra số điện thoại đã tồn tại chưa
+    IF p_phone IS NOT NULL THEN
+        IF EXISTS (SELECT 1 FROM accounts WHERE phone = p_phone) THEN
+            RETURN FALSE; -- Số điện thoại đã tồn tại
+        END IF;
+    END IF;
+
+    -- Mã hóa mật khẩu
+    hashed_password := crypt(p_password, gen_salt('bf'));
+
+    -- Tạo tài khoản mới
+    INSERT INTO accounts (username, passwd, phone, address, creator, time_created, time_updated)
+    VALUES (p_username, hashed_password, p_phone, p_address, p_creator, NOW(), NOW())
+    RETURNING id INTO new_account_id;
+
+    -- Nếu có mã PIN, mã hóa nó
+    IF p_pin IS NOT NULL THEN
+        encrypted_pin := crypt(LEFT(p_pin, 6), gen_salt('bf'));
+    ELSE
+        encrypted_pin := NULL;
+    END IF;
+
+    -- Tạo thẻ cho tài khoản mới
+    INSERT INTO cards (id_account, card_number, card_holder_name, pin, cvv, total_amount, time_created, time_updated)
+    VALUES 				(new_account_id, p_card_number, p_card_holder_name, encrypted_pin, p_cvv, p_total_amount, NOW(), NOW());
+
+    RETURN TRUE;
+EXCEPTION
+    WHEN unique_violation THEN
+        RETURN FALSE; -- Trả về FALSE nếu username hoặc card_number trùng
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT create_account_and_card(
+    'Nguyen',  
+    '12345',              
+    '123456799012332423456', 
+    'Nguyen',  
+    '123'
+	'093282626',
+	'Da nang'
+);
+
+
+
+
+

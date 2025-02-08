@@ -2,7 +2,7 @@
 -- Table: accounts
 -- ====================
 CREATE TABLE accounts (
-    id int PRIMARY KEY,
+    id serial PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     passwd TEXT NOT NULL,
     phone TEXT,
@@ -17,15 +17,16 @@ CREATE TABLE accounts (
 -- Table: cards
 -- ====================
 CREATE TABLE cards (
-    id int PRIMARY KEY,
+    id serial PRIMARY KEY,
     id_account INT NOT NULL,
     card_number TEXT NOT NULL UNIQUE,
     card_holder_name TEXT NOT NULL,
-    pin VARCHAR(6),
+    pin TEXT,
     cvv TEXT NOT NULL,
     total_amount NUMERIC(15, 2) DEFAULT 0.00,
     time_created TIMESTAMP DEFAULT NOW(),
     time_updated TIMESTAMP DEFAULT NOW(),
+	expiration_date TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '5 years');
     CONSTRAINT fk_account FOREIGN KEY (id_account) REFERENCES accounts (id) ON DELETE CASCADE
 );
 
@@ -33,7 +34,7 @@ CREATE TABLE cards (
 -- Table: savings
 -- ====================
 CREATE TABLE savings (
-    id int PRIMARY KEY,
+    id serial PRIMARY KEY,
     id_account INT NOT NULL,
     goal_name TEXT NOT NULL,
     goal_amount NUMERIC(15, 2) NOT NULL,
@@ -46,7 +47,7 @@ CREATE TABLE savings (
 -- Table: notifications
 -- ====================
 CREATE TABLE notifications (
-    id int PRIMARY KEY,
+    id serial PRIMARY KEY,
     id_account INT NOT NULL,
     messages TEXT NOT NULL,
     sent_at TIMESTAMP DEFAULT NOW(),
@@ -57,7 +58,7 @@ CREATE TABLE notifications (
 -- Table: categories
 -- ====================
 CREATE TABLE categories (
-    id int PRIMARY KEY,
+    id serial PRIMARY KEY,
     type_category INT NOT NULL CHECK (type_category IN (0, 1)),
     name_category TEXT NOT NULL,
     icon TEXT,
@@ -72,7 +73,7 @@ CREATE TABLE categories (
 -- Table: transactions
 -- ====================
 CREATE TABLE transactions (
-    id int PRIMARY KEY,
+    id serial PRIMARY KEY,
     type_transaction INT NOT NULL CHECK (type_transaction IN (1, 2)),
     transaction_hash VARCHAR(256) NOT NULL UNIQUE,
     account_receiver VARCHAR(255) NOT NULL,
@@ -91,5 +92,8 @@ CREATE TABLE transactions (
 
 ALTER TABLE transactions
 DROP CONSTRAINT transactions_type_transaction_check;
+
+
+
 
 

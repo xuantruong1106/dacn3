@@ -4,7 +4,8 @@ import 'package:dacn3/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Home2 extends StatefulWidget {
-  Home2({super.key});
+  final int userId;
+  Home2({super.key, required this.userId});
 
   final db = DatabaseConnection();
 
@@ -33,11 +34,15 @@ class Home2State extends State<Home2> {
   Future<void> getInfoUser() async {
     try {
       await widget.db.connect();
+      // ignore: avoid_print
+      print(widget.userId);
       final results = await widget.db.executeQuery(
           'SELECT * FROM get_user_and_card_info(@id);',
           substitutionValues: {
-            'id': 1,
+            'id': widget.userId,
           });
+      // ignore: avoid_print
+      print(results);
 
       setState(() {
         dataUser = results
@@ -47,7 +52,9 @@ class Home2State extends State<Home2> {
                   'address': row[2],
                   'card_number': row[3],
                   'card_holder_name': row[4],
-                  'total_amount': row[5],
+                  'cvv': row[5],
+                  'expiration_date': row[6].toString().substring(0, 10).split('-').reversed.join('/'),
+                  'total_amount': row[7],
                 })
             .toList();
       });
@@ -71,7 +78,7 @@ class Home2State extends State<Home2> {
       final results = await widget.db.executeQuery(
           'SELECT * FROM get_basic_transaction_info(@id);',
           substitutionValues: {
-            'id': 1,
+            'id': widget.userId,
           });
 
       setState(() {
@@ -96,10 +103,6 @@ class Home2State extends State<Home2> {
       // ignore: avoid_print
       print('Connection closed for getInfoTransaction');
     }
-  }
-
-  Future? onPressed() {
-    return null;
   }
 
   @override
@@ -241,7 +244,7 @@ class Home2State extends State<Home2> {
                     bottom: 10,
                     left: 20,
                     child: Text(
-                      '12/24', // Expiration date
+                      "${dataUser[0]['expiration_date']}", // Expiration date
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -263,7 +266,7 @@ class Home2State extends State<Home2> {
                     bottom: 10,
                     left: 130,
                     child: Text(
-                      '123', // CVV
+                      "${dataUser[0]['cvv']}", // CVV
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
