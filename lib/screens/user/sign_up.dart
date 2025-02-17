@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:dacn3/database_connect.dart';
+import 'package:dacn3/connect/database_connect.dart';
 import 'package:dacn3/random_cvv_card_numbrer/utils.dart'; 
 class SignUpScreen extends StatefulWidget {
   SignUpScreen({super.key});
