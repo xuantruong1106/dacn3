@@ -63,10 +63,8 @@ CREATE TABLE categories (
     name_category TEXT NOT NULL,
     icon TEXT,
     note TEXT,
-    id_card INT NOT NULL,
     time_created TIMESTAMP DEFAULT NOW(),
     time_updated TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT fk_card FOREIGN KEY (id_card) REFERENCES cards (id) ON DELETE CASCADE
 );
 
 -- ====================

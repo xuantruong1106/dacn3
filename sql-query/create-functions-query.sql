@@ -205,14 +205,12 @@ AS $$
         a.id = account_id;
 $$;
 
-
 CREATE OR REPLACE FUNCTION get_user_and_card_info(account_id INT)
 RETURNS TABLE (
     username TEXT,
     phone TEXT,
     address TEXT,
     card_number TEXT,
-    card_holder_name TEXT,
     cvv TEXT,
     expiration_date TIMESTAMP,
     total_amount NUMERIC(15, 2)
@@ -224,7 +222,6 @@ AS $$
         a.phone, 
         a.address, 
         c.card_number, 
-        c.card_holder_name, 
         c.cvv,
         c.expiration_date,
         c.total_amount
