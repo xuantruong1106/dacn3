@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dacn3/database_connect.dart';
+import 'package:dacn3/connect/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class MyCardsScreen extends StatefulWidget {
@@ -37,10 +37,9 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                   'phone': row[1],
                   'address': row[2],
                   'card_number': row[3],
-                  'card_holder_name': row[4],
-                  'cvv': row[5],
-                  'expiration_date': row[6].toString().substring(0, 10).split('-').reversed.join('/'),
-                  'total_amount': row[7],
+                  'cvv': row[4],
+                  'expiration_date': row[5].toString().substring(0, 10).split('-').reversed.join('/'),
+                  'total_amount': row[6],
                 })
             .toList();
       });
@@ -130,7 +129,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                     top: 110,
                     left: 20,
                     child: Text(
-                      "${dataUser[0]['card_holder_name']}", // Cardholder name
+                      "${dataUser[0]['card_number']}", // Cardholder name
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,

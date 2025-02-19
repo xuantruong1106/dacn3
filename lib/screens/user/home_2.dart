@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:dacn3/database_connect.dart';
+import 'package:dacn3/connect/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Home2 extends StatefulWidget {
@@ -51,10 +51,9 @@ class Home2State extends State<Home2> {
                   'phone': row[1],
                   'address': row[2],
                   'card_number': row[3],
-                  'card_holder_name': row[4],
-                  'cvv': row[5],
-                  'expiration_date': row[6].toString().substring(0, 10).split('-').reversed.join('/'),
-                  'total_amount': row[7],
+                  'cvv': row[4],
+                  'expiration_date': row[5].toString().substring(0, 10).split('-').reversed.join('/'),
+                  'total_amount': row[6],
                 })
             .toList();
       });
@@ -222,7 +221,7 @@ class Home2State extends State<Home2> {
                     top: 110,
                     left: 20,
                     child: Text(
-                      "${dataUser[0]['card_holder_name']}", // Cardholder name
+                      "${dataUser[0]['card_number']}", // Cardholder name
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -330,7 +329,8 @@ class Home2State extends State<Home2> {
             ),
             // Transactions List
             Expanded(
-              child: ListView.builder(
+              // ignore: unnecessary_null_comparison
+              child: dataTrancsaction.isNotEmpty || dataTrancsaction.length != null ? ListView.builder(
                 padding: const EdgeInsets.all(20.0),
                 itemCount: dataTrancsaction.length,
                 itemBuilder: (context, index) {
@@ -414,6 +414,14 @@ class Home2State extends State<Home2> {
                     ),
                   );
                 },
+              )
+            : Center(
+                child: Text(
+                  "No Data",
+                  style: GoogleFonts.roboto(
+                    textStyle: TextStyle(fontSize: 16, color: Colors.red),
+                  ),
+                ),
               ),
             ),
           ],
