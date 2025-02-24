@@ -289,17 +289,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- create_account_and_card
-CREATE OR REPLACE FUNCTION create_account_and_card(
+CREATE OR REPLACE FUNCTION create_account_and_card3(
     p_username TEXT,
     p_password TEXT,
     p_card_number TEXT,
-    p_card_holder_name TEXT,
     p_cvv TEXT,
 	p_phone TEXT,
-    p_address TEXT,
-    p_creator INT DEFAULT 0,
-    p_pin TEXT DEFAULT NULL,
-    p_total_amount NUMERIC(15, 2) DEFAULT 0.00
+    p_address TEXT
 ) 
 RETURNS BOOLEAN AS $$ 
 DECLARE
@@ -318,20 +314,13 @@ BEGIN
     hashed_password := crypt(p_password, gen_salt('bf'));
 
     -- Tạo tài khoản mới
-    INSERT INTO accounts (username, passwd, phone, address, creator, time_created, time_updated)
-    VALUES (p_username, hashed_password, p_phone, p_address, p_creator, NOW(), NOW())
+    INSERT INTO accounts (username, passwd, phone, address)
+    VALUES (p_username, hashed_password, p_phone, p_address)
     RETURNING id INTO new_account_id;
 
-    -- Nếu có mã PIN, mã hóa nó
-    IF p_pin IS NOT NULL THEN
-        encrypted_pin := crypt(LEFT(p_pin, 6), gen_salt('bf'));
-    ELSE
-        encrypted_pin := NULL;
-    END IF;
-
     -- Tạo thẻ cho tài khoản mới
-    INSERT INTO cards (id_account, card_number, card_holder_name, pin, cvv, total_amount, time_created, time_updated)
-    VALUES 				(new_account_id, p_card_number, p_card_holder_name, encrypted_pin, p_cvv, p_total_amount, NOW(), NOW());
+    INSERT INTO cards (id_account, card_number, cvv)
+    VALUES 				(new_account_id, p_card_number, p_cvv);
 
     RETURN TRUE;
 EXCEPTION
@@ -340,15 +329,15 @@ EXCEPTION
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_account_and_card(
-    'Nguyen',  
+SELECT * from create_account_and_card3(
+    'Ngyen2',  
     '12345',              
-    '123456799012332423456', 
-    'Nguyen',  
-    '123'
-	'093282626',
+    '111111111111',  
+    '1234',
+	'1111111111',
 	'Da nang'
 );
+
 
 
 
