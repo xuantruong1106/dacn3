@@ -24,7 +24,9 @@ class RequestMoneyScreen extends StatelessWidget {
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -53,7 +55,7 @@ class RequestMoneyScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Tanya Myroniuk',
                   prefixIcon:
-                  Icon(Icons.person_outline, color: Colors.grey[400]),
+                      Icon(Icons.person_outline, color: Colors.grey[400]),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey[300]!),
                   ),
@@ -90,7 +92,7 @@ class RequestMoneyScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Tanya Myroniuk',
                   prefixIcon:
-                  Icon(Icons.person_outline, color: Colors.grey[400]),
+                      Icon(Icons.person_outline, color: Colors.grey[400]),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey[300]!),
                   ),
@@ -199,7 +201,7 @@ class RequestMoneyScreen extends StatelessWidget {
                         Expanded(
                           child: TextField(
                             keyboardType:
-                            TextInputType.numberWithOptions(decimal: true),
+                                TextInputType.numberWithOptions(decimal: true),
                             style: const TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.bold,

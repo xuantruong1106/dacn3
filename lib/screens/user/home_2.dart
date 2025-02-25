@@ -18,14 +18,14 @@ class Home2 extends StatefulWidget {
 class Home2State extends State<Home2> {
   // late bool isLoading;
   late List<Map<String, dynamic>> dataUser;
-  late List<Map<String, dynamic>> dataTrancsaction;
+  late List<Map<String, dynamic>> dataTransaction;
 
   @override
   void initState() {
     super.initState();
     // isLoading = true;
     dataUser = [];
-    dataTrancsaction = [];
+    dataTransaction = [];
     getInfoUser().then((_) {
       getInfoTransaction();
     });
@@ -52,7 +52,12 @@ class Home2State extends State<Home2> {
                   'address': row[2],
                   'card_number': row[3],
                   'cvv': row[4],
-                  'expiration_date': row[5].toString().substring(0, 10).split('-').reversed.join('/'),
+                  'expiration_date': row[5]
+                      .toString()
+                      .substring(0, 10)
+                      .split('-')
+                      .reversed
+                      .join('/'),
                   'total_amount': row[6],
                 })
             .toList();
@@ -81,8 +86,8 @@ class Home2State extends State<Home2> {
           });
 
       setState(() {
-        if (dataTrancsaction.isEmpty) {
-          dataTrancsaction = results
+        if (dataTransaction.isEmpty) {
+          dataTransaction = results
               .map((row) => {
                     'type_transaction': row[1],
                     'transaction_amount': row[2],
@@ -93,7 +98,7 @@ class Home2State extends State<Home2> {
         }
       });
       // ignore: avoid_print
-      print(dataTrancsaction);
+      print(dataTransaction);
     } catch (e) {
       // ignore: avoid_print
       print('Error: $e');
@@ -135,7 +140,9 @@ class Home2State extends State<Home2> {
                         textStyle: TextStyle(fontSize: 16, color: Colors.grey)),
                   ),
                   Text(
-                    "${dataUser[0]['username']}",
+                    dataUser.isNotEmpty
+                        ? "${dataUser[0]['username']}"
+                        : "Guest",
                     style: GoogleFonts.roboto(
                         textStyle:
                             TextStyle(fontSize: 20, color: Colors.black)),
@@ -209,7 +216,9 @@ class Home2State extends State<Home2> {
                     top: 70,
                     left: 20,
                     child: Text(
-                      "${dataUser[0]['card_number']}", // Card number
+                      dataUser.isNotEmpty
+                          ? '\$${dataUser[0]['total_amount']}'
+                          : '\$0.00', // Card number
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -221,7 +230,9 @@ class Home2State extends State<Home2> {
                     top: 110,
                     left: 20,
                     child: Text(
-                      "${dataUser[0]['card_number']}", // Cardholder name
+                      dataUser.isNotEmpty
+                          ? "${dataUser[0]['card_number']}"
+                          : '0000 0000 0000 0000', // Cardholder name
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -243,7 +254,9 @@ class Home2State extends State<Home2> {
                     bottom: 10,
                     left: 20,
                     child: Text(
-                      "${dataUser[0]['expiration_date']}", // Expiration date
+                      dataUser.isNotEmpty
+                          ? "${dataUser[0]['expiration_date']}"
+                          : '0000 0000 0000 0000', // Expiration date
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -265,7 +278,9 @@ class Home2State extends State<Home2> {
                     bottom: 10,
                     left: 130,
                     child: Text(
-                      "${dataUser[0]['cvv']}", // CVV
+                      dataUser.isNotEmpty
+                          ? "${dataUser[0]['cvv']}"
+                          : '000', // Expiration date, // CVV
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -297,9 +312,8 @@ class Home2State extends State<Home2> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildActionButton(Icons.arrow_upward, 'Sent'),
-                  _buildActionButton(Icons.arrow_downward, 'Receive'),
                   _buildActionButton(Icons.attach_money, 'Loan'),
-                  _buildActionButton(Icons.add, 'Topup'),
+                  _buildActionButton(Icons.add, 'Money Limit'),
                 ],
               ),
             ),
@@ -330,99 +344,106 @@ class Home2State extends State<Home2> {
             // Transactions List
             Expanded(
               // ignore: unnecessary_null_comparison
-              child: dataTrancsaction.isNotEmpty || dataTrancsaction.length != null ? ListView.builder(
-                padding: const EdgeInsets.all(20.0),
-                itemCount: dataTrancsaction.length,
-                itemBuilder: (context, index) {
-                  return  Padding(
-                padding: const EdgeInsets.only(top: 10.0, left: 20.0),
-                child: Row(
-                  children: [
-                     // display category name
-                    Text(
-                      '${dataTrancsaction[index]['icon']}',
-                      style: GoogleFonts.roboto(
-                        textStyle: TextStyle(fontSize: 40, color: Colors.black),
-                      ),
-                    ),
-                    Padding(
-                        padding: const EdgeInsets.only(top: 5.0, left: 10.0),
-                        child: Row(
-                          children: [
-                            dataTrancsaction.isNotEmpty
-                                ? Text(
-                                    '${dataTrancsaction[index]['category_name']}',
-                                    style: GoogleFonts.roboto(
-                                      textStyle: TextStyle(
-                                          fontSize: 20, color: Colors.black),
-                                    ),
-                                  )
-                                : Text(
-                                    "No Data",
-                                    style: GoogleFonts.roboto(
-                                      textStyle: TextStyle(
-                                          fontSize: 16, color: Colors.red),
-                                    ),
-                                  ),
-                          ],
-                        )),
-                    Spacer(),
-                    // 0: income, 1: expense
-                    Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
+              child: dataTransaction.isNotEmpty
+                  ? ListView.builder(
+                      padding: const EdgeInsets.all(20.0),
+                      itemCount: dataTransaction.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 10.0, left: 20.0),
                           child: Row(
                             children: [
-                              dataTrancsaction[index]['type_transaction'] == 0
-                                  ? Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 20.0, left: 2.0),
-                                      child: Text(
-                                        '\$${dataTrancsaction[index]['transaction_amount']}',
-                                        style: GoogleFonts.roboto(
-                                          textStyle: TextStyle(
-                                            fontSize: 18,
-                                            color: dataTrancsaction[0]
-                                                        ['type_transaction'] ==
-                                                    0
-                                                ? Colors.black
-                                                : Color(0xFF0066FF),
+                              // display category name
+                              Text(
+                                '${dataTransaction[index]['icon']}',
+                                style: GoogleFonts.roboto(
+                                  textStyle: TextStyle(
+                                      fontSize: 40, color: Colors.black),
+                                ),
+                              ),
+                              Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 5.0, left: 10.0),
+                                  child: Row(
+                                    children: [
+                                      dataTransaction.isNotEmpty
+                                          ? Text(
+                                              '${dataTransaction[index]['category_name']}',
+                                              style: GoogleFonts.roboto(
+                                                textStyle: TextStyle(
+                                                    fontSize: 20,
+                                                    color: Colors.black),
+                                              ),
+                                            )
+                                          : Text(
+                                              "No Data",
+                                              style: GoogleFonts.roboto(
+                                                textStyle: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.red),
+                                              ),
+                                            ),
+                                    ],
+                                  )),
+                              Spacer(),
+                              // 0: income, 1: expense
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Row(
+                                  children: [
+                                    dataTransaction[index]
+                                                ['type_transaction'] ==
+                                            0
+                                        ? Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 20.0, left: 2.0),
+                                            child: Text(
+                                              '\$${dataTransaction[index]['transaction_amount']}',
+                                              style: GoogleFonts.roboto(
+                                                textStyle: TextStyle(
+                                                  fontSize: 18,
+                                                  color: dataTransaction[0][
+                                                              'type_transaction'] ==
+                                                          0
+                                                      ? Colors.black
+                                                      : Color(0xFF0066FF),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 20.0, left: 2.0),
+                                            child: Text(
+                                              '-\$${dataTransaction[index]['transaction_amount']}',
+                                              style: GoogleFonts.roboto(
+                                                textStyle: TextStyle(
+                                                  fontSize: 18,
+                                                  color: dataTransaction[index][
+                                                              'type_transaction'] ==
+                                                          0
+                                                      ? Colors.black
+                                                      : Color(0xFF0066FF),
+                                                ),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    )
-                                  : Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 20.0, left: 2.0),
-                                      child: Text(
-                                        '-\$${dataTrancsaction[index]['transaction_amount']}',
-                                        style: GoogleFonts.roboto(
-                                          textStyle: TextStyle(
-                                            fontSize: 18,
-                                            color: dataTrancsaction[index]
-                                                        ['type_transaction'] ==
-                                                    0
-                                                ? Colors.black
-                                                : Color(0xFF0066FF),
-                                           ),
-                                        ),
-                                      ),
-                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Text(
+                        "No Data",
+                        style: GoogleFonts.roboto(
+                          textStyle: TextStyle(fontSize: 16, color: Colors.red),
                         ),
-                      ],
+                      ),
                     ),
-                  );
-                },
-              )
-            : Center(
-                child: Text(
-                  "No Data",
-                  style: GoogleFonts.roboto(
-                    textStyle: TextStyle(fontSize: 16, color: Colors.red),
-                  ),
-                ),
-              ),
             ),
           ],
         ),

@@ -25,7 +25,9 @@ class EditProfileScreen extends StatelessWidget {
                       ),
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                       ),
                     ),
                     const Expanded(
@@ -99,7 +101,7 @@ class EditProfileScreen extends StatelessWidget {
                       decoration: InputDecoration(
                         hintText: 'dennis nzioki',
                         prefixIcon:
-                        Icon(Icons.person_outline, color: Colors.grey[400]),
+                            Icon(Icons.person_outline, color: Colors.grey[400]),
                         border: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey[300]!),
                         ),
@@ -117,7 +119,7 @@ class EditProfileScreen extends StatelessWidget {
                       decoration: InputDecoration(
                         hintText: 'dennisnzioki@gmail.com',
                         prefixIcon:
-                        Icon(Icons.mail_outline, color: Colors.grey[400]),
+                            Icon(Icons.mail_outline, color: Colors.grey[400]),
                         border: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey[300]!),
                         ),
@@ -135,7 +137,7 @@ class EditProfileScreen extends StatelessWidget {
                       decoration: InputDecoration(
                         hintText: '+15401712663389',
                         prefixIcon:
-                        Icon(Icons.phone_outlined, color: Colors.grey[400]),
+                            Icon(Icons.phone_outlined, color: Colors.grey[400]),
                         border: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey[300]!),
                         ),
@@ -154,7 +156,7 @@ class EditProfileScreen extends StatelessWidget {
                       decoration: InputDecoration(
                         hintText: '123456',
                         prefixIcon:
-                        Icon(Icons.lock_outline, color: Colors.grey[400]),
+                            Icon(Icons.lock_outline, color: Colors.grey[400]),
                         border: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey[300]!),
                         ),

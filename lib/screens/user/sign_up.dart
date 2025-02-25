@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:dacn3/connect/database_connect.dart';
-import 'package:dacn3/connect/blockchain_service.dart';
-import 'package:dacn3/random_cvv_card_numbrer/utils.dart';
-
+import 'package:dacn3/random_cvv_card_numbrer/utils.dart'; 
 class SignUpScreen extends StatefulWidget {
   SignUpScreen({super.key});
   
@@ -21,7 +19,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isPasswordVisible = false;
   
 
   @override
@@ -32,25 +29,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _passwordController.dispose();
     super.dispose();
   }
-  Future<bool> _registerUser(String name, String password, String cvv, String phone, String address) async {
+
+  Future<bool> _registerUser(String name, String password, String cardNumber, String cvv, String phone, String address) async {
     try {
-
-       print('Signing up... Bắt đầu quá trình đăng ký...');
-
-      await widget._blockchainService.init();
-      print('Signing up... Dịch vụ blockchain đã được khởi tạo thành công.');
-
-      String userAddress = "";
-      Map<String, dynamic> account = {};
-      
-      print('Signing up... Tạo tài khoản blockchain cho: $name');
-      userAddress = await widget._blockchainService.createAccount(name);
-      print(userAddress); 
-      
-       if(userAddress.isEmpty) {
-        return false;
-       }
-
       await widget.db.connect();
 
       final results = await widget.db.executeQuery(
@@ -58,7 +39,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         substitutionValues: {
           'name': name,
           'password': password,
-          'card_number': userAddress,
+          'card_number': cardNumber, 
+          'card_holder_name': name, 
           'cvv': cvv,
           'phone': phone,
           'address': address,
@@ -81,9 +63,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final phone = _phoneController.text.trim();
     final address = _addressController.text.trim();
     final password = _passwordController.text;
-    final cvv = generateRandomCVV();
+    final cardNumber = generateRandomCardNumber(); //
+    final cvv = generateRandomCVV(); 
 
-    final isRegistered = await _registerUser(name, password, cvv, phone, address);
+    final isRegistered = await _registerUser(name, password, cardNumber, cvv, phone, address);
     if (!mounted) return;
 
     if (isRegistered) {
@@ -114,35 +97,157 @@ class _SignUpScreenState extends State<SignUpScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Sign Up', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 32),
-                _buildTextField('Full Name', _nameController, Icons.person_outline),
-                const SizedBox(height: 24),
-                _buildTextField('Phone Number', _phoneController, Icons.phone_outlined, keyboardType: TextInputType.phone),
-                const SizedBox(height: 24),
-                _buildTextField('Address', _addressController, Icons.location_on_outlined),
-                const SizedBox(height: 24),
-                _buildPasswordField(),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _signUp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0066FF),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Sign Up',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Full Name Field
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Full Name',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
                     ),
-                    child: const Text('Sign Up', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      hintText: 'dennis nzioki',
+                      hintStyle: TextStyle(color: Colors.grey.shade400),
+                      prefixIcon: Icon(Icons.person_outline, color: Colors.grey.shade400),
+                      border: InputBorder.none,
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Phone Number Field
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Phone Number',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      hintText: '+254171266389',
+                      hintStyle: TextStyle(color: Colors.grey.shade400),
+                      prefixIcon: Icon(Icons.phone_outlined, color: Colors.grey.shade400),
+                      border: InputBorder.none,
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Email Field
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Email Address',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _addressController,
+                    keyboardType: TextInputType.streetAddress,
+                    decoration: InputDecoration(
+                      hintText: 'Dang Nang',
+                      hintStyle: TextStyle(color: Colors.grey.shade400),
+                      prefixIcon: Icon(Icons.streetview_outlined, color: Colors.grey.shade400),
+                      border: InputBorder.none,
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Password Field
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Password',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: !_isPasswordVisible,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.lock_outline, color: Colors.grey.shade400),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.grey.shade400,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                      border: InputBorder.none,
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              // Sign Up Button
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _signUp,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0066FF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Sign Up',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                Center(
+              ),
+              const Spacer(),
+              // Bottom Text
+              Center(
                 child: RichText(
                   text: TextSpan(
                     text: "Already have an account. ",
@@ -177,52 +282,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField(String label, TextEditingController controller, IconData icon, {TextInputType keyboardType = TextInputType.text}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          validator: (value) => value!.isEmpty ? '$label cannot be empty' : null,
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: Colors.grey.shade400),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            filled: true,
-            fillColor: Colors.grey.shade50,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Password', style: TextStyle(color: Colors.grey, fontSize: 14)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: _passwordController,
-          obscureText: !_isPasswordVisible,
-          validator: (value) => value!.length < 6 ? 'Password must be at least 6 characters' : null,
-          decoration: InputDecoration(
-            prefixIcon: Icon(Icons.lock_outline, color: Colors.grey.shade400),
-            suffixIcon: IconButton(
-              icon: Icon(_isPasswordVisible ? Icons.visibility_off : Icons.visibility, color: Colors.grey.shade400),
-              onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-            ),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            filled: true,
-            fillColor: Colors.grey.shade50,
-          ),
-        ),
-      ],
     );
   }
 }
