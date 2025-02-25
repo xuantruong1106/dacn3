@@ -10,19 +10,21 @@ import 'package:dacn3/screens/user/user.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    final int userId = settings.arguments as int;
+    final int? userId = settings.arguments as int?;
 
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => CheckLoginScreen());
       case '/main':
-        return MaterialPageRoute(builder: (_) => UserScreen(userId: userId));
+        return MaterialPageRoute(
+            builder: (_) => UserScreen(userId: userId ?? 0));
       case '/sign_in':
         return MaterialPageRoute(builder: (_) => SignInScreen());
       case '/sign_up':
         return MaterialPageRoute(builder: (_) => SignUpScreen());
       case '/my_card':
-        return MaterialPageRoute(builder: (_) => MyCardsScreen(userId: userId));
+        return MaterialPageRoute(
+            builder: (_) => MyCardsScreen(userId: userId ?? 0));
       // case '/welcome':
       //   return MaterialPageRoute(builder: (_) => WelcomeScreen());
       default:
@@ -46,7 +48,8 @@ class CheckLoginScreen extends StatelessWidget {
     if (isLoggedIn) {
       Future.microtask(() => Navigator.pushReplacementNamed(context, '/main'));
     } else {
-      Future.microtask(() => Navigator.pushReplacementNamed(context, '/welcome'));
+      Future.microtask(
+          () => Navigator.pushReplacementNamed(context, '/welcome'));
     }
 
     return Scaffold(

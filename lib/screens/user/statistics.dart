@@ -1,39 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'dart:math' as math;
 
 class StatisticsScreen extends StatelessWidget {
-  const StatisticsScreen({super.key});
+  const StatisticsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
-        title: const Text(
-          'Statistics',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Current Balance
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                  const Text(
+                    'Statistics',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.notifications_none),
+                      onPressed: () {},
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Current Balance
+            Column(
               children: const [
                 Text(
                   'Current Balance',
@@ -52,174 +71,167 @@ class StatisticsScreen extends StatelessWidget {
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 40),
 
-          // Chart
-          SizedBox(
-            height: 200,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          const titles = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
-                          final index = value.toInt();
-                          if (index >= 0 && index < titles.length) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text(
-                                titles[index],
-                                style: TextStyle(
-                                  color: index == 3 ? Colors.blue : Colors.grey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            );
-                          }
-                          return const Text('');
-                        },
-                        reservedSize: 30,
+            // Progress Indicator
+            SizedBox(
+              height: 200,
+              width: 200,
+              child: CustomPaint(
+                painter: CircularProgressPainter(),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        '55%',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
+                      Text(
+                        'Transaction',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: const [
-                        FlSpot(0, 4),
-                        FlSpot(1, 3),
-                        FlSpot(2, 4),
-                        FlSpot(3, 5),
-                        FlSpot(4, 3),
-                        FlSpot(5, 6),
-                      ],
-                      isCurved: true,
-                      color: Colors.blue,
-                      barWidth: 2,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: Colors.blue.withOpacity(0.1),
-                      ),
-                    ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            // Categories
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildCategoryItem('Transaction', Colors.orange),
+                      _buildCategoryItem('Transfer', Colors.teal),
+                      _buildCategoryItem('Travel', Colors.blue),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildCategoryItem('Food', Colors.pink),
+                      _buildCategoryItem('Shopping', Colors.orange),
+                      _buildCategoryItem('Car', Colors.teal),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const Spacer(),
+
+            // Bottom Navigation
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Colors.grey[200]!),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(Icons.home, 'Home', true),
+                    _buildNavItem(Icons.pie_chart_outline, 'Statistics', false),
+                    _buildNavItem(Icons.settings, 'Settings', false),
                   ],
                 ),
               ),
             ),
-          ),
-
-          // Transactions Header
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Transaction',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Sell All',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Transactions List
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildTransactionItem(
-                  icon: Icons.apple,
-                  title: 'Apple Store',
-                  subtitle: 'Entertainment',
-                  amount: '-\$5.99',
-                  isExpense: true,
-                ),
-                _buildTransactionItem(
-                  icon: Icons.music_note,
-                  title: 'Spotify',
-                  subtitle: 'Music',
-                  amount: '-\$12.99',
-                  isExpense: true,
-                ),
-                _buildTransactionItem(
-                  icon: Icons.swap_horiz,
-                  title: 'Money Transfer',
-                  subtitle: 'Transaction',
-                  amount: '\$300',
-                  isExpense: false,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required String amount,
-    required bool isExpense,
-  }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(
-          color: Colors.grey.shade600,
-          fontSize: 12,
-        ),
-      ),
-      trailing: Text(
-        amount,
-        style: TextStyle(
-          color: isExpense ? Colors.black : Colors.blue,
-          fontWeight: FontWeight.w600,
+          ],
         ),
       ),
     );
   }
+
+  Widget _buildCategoryItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, bool isSelected) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: isSelected ? Colors.blue : Colors.grey,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.blue : Colors.grey,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class CircularProgressPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width / 2, size.height / 2) - 20;
+    final strokeWidth = 15.0;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    // Background circle
+    paint.color = Colors.grey[200]!;
+    canvas.drawCircle(center, radius, paint);
+
+    // Progress segments
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final colors = [Colors.pink, Colors.purple, Colors.teal];
+    final startAngles = [0.0, 2.0, 4.0];
+    final sweepAngles = [2.0, 2.0, 2.0];
+
+    for (var i = 0; i < colors.length; i++) {
+      paint.color = colors[i];
+      canvas.drawArc(
+        rect,
+        startAngles[i],
+        sweepAngles[i],
+        false,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

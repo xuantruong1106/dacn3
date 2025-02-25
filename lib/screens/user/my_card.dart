@@ -14,14 +14,14 @@ class MyCardsScreen extends StatefulWidget {
 class _MyCardsScreenState extends State<MyCardsScreen> {
   double _sliderValue = 4600;
   late List<Map<String, dynamic>> dataUser;
-   @override
+  @override
   void initState() {
     super.initState();
     dataUser = [];
     getInfoUser();
   }
 
-    Future<void> getInfoUser() async {
+  Future<void> getInfoUser() async {
     try {
       await widget.db.connect();
       final results = await widget.db.executeQuery(
@@ -38,7 +38,12 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                   'address': row[2],
                   'card_number': row[3],
                   'cvv': row[4],
-                  'expiration_date': row[5].toString().substring(0, 10).split('-').reversed.join('/'),
+                  'expiration_date': row[5]
+                      .toString()
+                      .substring(0, 10)
+                      .split('-')
+                      .reversed
+                      .join('/'),
                   'total_amount': row[6],
                 })
             .toList();
@@ -73,7 +78,9 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
         ],
       ),
@@ -81,122 +88,122 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // Credit Card
-           Container(
-              width: 375.0,
-              height: 200.0,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF4B5B98), Color.fromARGB(255, 52, 25, 105)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20.0),
+          Container(
+            width: 375.0,
+            height: 200.0,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF4B5B98), Color.fromARGB(255, 52, 25, 105)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              margin: const EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 20,
-                    left: 20,
-                    child: Icon(
-                      Icons.credit_card,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                  Positioned(
-                    top: 20,
-                    right: 20,
-                    child: Icon(
-                      Icons.contactless,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                  Positioned(
-                    top: 70,
-                    left: 20,
-                    child: Text(
-                      "${dataUser[0]['card_number']}", // Card number
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 110,
-                    left: 20,
-                    child: Text(
-                      "${dataUser[0]['card_number']}", // Cardholder name
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 35,
-                    left: 20,
-                    child: Text(
-                      'Expire day', // Expiration date
-                      style: TextStyle(
-                        color: const Color.fromARGB(255, 205, 203, 203),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 10,
-                    left: 20,
-                    child: Text(
-                      "${dataUser[0]['expiration_date']}", // Expiration date
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 35,
-                    left: 130,
-                    child: Text(
-                      'CVV', // Expiration date
-                      style: TextStyle(
-                        color: const Color.fromARGB(255, 205, 203, 203),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 10,
-                    left: 130,
-                    child: Text(
-                      "${dataUser[0]['cvv']}", // CVV
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 10,
-                    right: 30,
-                    child: SvgPicture.asset(
-                      "assets/mastercard.svg",
-                      width: 70,
-                      height: 60,
-                      placeholderBuilder: (context) => Icon(
-                        Icons.error,
-                        color: Colors.red,
-                        size: 30,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              borderRadius: BorderRadius.circular(20.0),
             ),
+            margin: const EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  child: Icon(
+                    Icons.credit_card,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+                Positioned(
+                  top: 20,
+                  right: 20,
+                  child: Icon(
+                    Icons.contactless,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+                Positioned(
+                  top: 70,
+                  left: 20,
+                  child: Text(
+                    "${dataUser[0]['card_number']}", // Card number
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 110,
+                  left: 20,
+                  child: Text(
+                    "${dataUser[0]['card_number']}", // Cardholder name
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 35,
+                  left: 20,
+                  child: Text(
+                    'Expire day', // Expiration date
+                    style: TextStyle(
+                      color: const Color.fromARGB(255, 205, 203, 203),
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 10,
+                  left: 20,
+                  child: Text(
+                    "${dataUser[0]['expiration_date']}", // Expiration date
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 35,
+                  left: 130,
+                  child: Text(
+                    'CVV', // Expiration date
+                    style: TextStyle(
+                      color: const Color.fromARGB(255, 205, 203, 203),
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 10,
+                  left: 130,
+                  child: Text(
+                    "${dataUser[0]['cvv']}", // CVV
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 10,
+                  right: 30,
+                  child: SvgPicture.asset(
+                    "assets/mastercard.svg",
+                    width: 70,
+                    height: 60,
+                    placeholderBuilder: (context) => Icon(
+                      Icons.error,
+                      color: Colors.red,
+                      size: 30,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
 
           // Transactions

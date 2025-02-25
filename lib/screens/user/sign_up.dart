@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dacn3/connect/database_connect.dart';
-import 'package:dacn3/random_cvv_card_numbrer/utils.dart'; 
+import 'package:dacn3/random_cvv_card_numbrer/utils.dart';
+
 class SignUpScreen extends StatefulWidget {
   SignUpScreen({super.key});
   final db = DatabaseConnection();
@@ -15,7 +16,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _passwordController = TextEditingController();
-  
 
   @override
   void dispose() {
@@ -26,7 +26,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  Future<bool> _registerUser(String name, String password, String cardNumber, String cvv, String phone, String address) async {
+  Future<bool> _registerUser(String name, String password, String cardNumber,
+      String cvv, String phone, String address) async {
+    if (name.isEmpty || phone.isEmpty || address.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields.')),
+      );
+      return false;
+    }
+
+    if (password.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Password must be at least 8 characters long.')),
+      );
+      return false;
+    }
+
     try {
       await widget.db.connect();
       final results = await widget.db.executeQuery(
@@ -34,8 +50,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         substitutionValues: {
           'name': name,
           'password': password,
-          'card_number': cardNumber, 
-          'card_holder_name': name, 
+          'card_number': cardNumber,
+          'card_holder_name': name,
           'cvv': cvv,
           'phone': phone,
           'address': address,
@@ -62,9 +78,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final address = _addressController.text;
     final password = _passwordController.text;
     final cardNumber = generateRandomCardNumber(); //
-    final cvv = generateRandomCVV(); 
+    final cvv = generateRandomCVV();
 
-    final isRegistered = await _registerUser(name, password, cardNumber, cvv, phone, address);
+    final isRegistered =
+        await _registerUser(name, password, cardNumber, cvv, phone, address);
     if (!mounted) return;
 
     if (isRegistered) {
@@ -123,7 +140,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     decoration: InputDecoration(
                       hintText: 'dennis nzioki',
                       hintStyle: TextStyle(color: Colors.grey.shade400),
-                      prefixIcon: Icon(Icons.person_outline, color: Colors.grey.shade400),
+                      prefixIcon: Icon(Icons.person_outline,
+                          color: Colors.grey.shade400),
                       border: InputBorder.none,
                       filled: true,
                       fillColor: Colors.grey.shade50,
@@ -150,7 +168,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     decoration: InputDecoration(
                       hintText: '+254171266389',
                       hintStyle: TextStyle(color: Colors.grey.shade400),
-                      prefixIcon: Icon(Icons.phone_outlined, color: Colors.grey.shade400),
+                      prefixIcon: Icon(Icons.phone_outlined,
+                          color: Colors.grey.shade400),
                       border: InputBorder.none,
                       filled: true,
                       fillColor: Colors.grey.shade50,
@@ -175,9 +194,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _addressController,
                     keyboardType: TextInputType.streetAddress,
                     decoration: InputDecoration(
-                      hintText: 'Dang Nang',
+                      hintText: 'user@example.com',
                       hintStyle: TextStyle(color: Colors.grey.shade400),
-                      prefixIcon: Icon(Icons.streetview_outlined, color: Colors.grey.shade400),
+                      prefixIcon: Icon(Icons.streetview_outlined,
+                          color: Colors.grey.shade400),
                       border: InputBorder.none,
                       filled: true,
                       fillColor: Colors.grey.shade50,
@@ -202,10 +222,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline, color: Colors.grey.shade400),
+                      prefixIcon:
+                          Icon(Icons.lock_outline, color: Colors.grey.shade400),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                          _isPasswordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           color: Colors.grey.shade400,
                         ),
                         onPressed: () {
@@ -237,6 +260,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: const Text(
                     'Sign Up',
                     style: TextStyle(
+                      color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),

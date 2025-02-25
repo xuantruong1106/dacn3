@@ -1,4 +1,6 @@
-import 'package:dacn3/screens/user/transactions.dart';
+import 'package:dacn3/screens/user/home_2.dart';
+import 'package:dacn3/screens/user/send_money.dart';
+import 'package:dacn3/screens/user/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:dacn3/screens/user/sign_in.dart';
 import 'package:dacn3/router.dart';
@@ -13,7 +15,7 @@ void main(List<String> arguments) async {
         scaffoldBackgroundColor: Colors.white,
       ),
       home: SafeArea(
-        child: Transactions(),
+        child: SignInScreen(),
       ),
       initialRoute: '/',
       onGenerateRoute: AppRouter.generateRoute,
@@ -30,13 +32,10 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SignInScreen()
-      ),
+      body: Center(child: SignInScreen()),
     );
   }
 }

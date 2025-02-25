@@ -1,6 +1,6 @@
 name: dacn3
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
@@ -18,7 +18,6 @@ dependencies:
   http: ^1.2.2
   flutter_dotenv: ^5.0.2
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -29,17 +28,18 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-  - assets/avatar.png
-  - assets/mastercard.svg
-  - assets/sent.svg
-  - assets/receive.svg
-  - assets/loan.svg
-  - assets/sent2.svg
-  - assets/sent1.svg
-  - assets/logo_app.png
-  - assets/splash_img.png
-  - assets/splash_imgg.png
-  - assets/splash_imggg.png
-  - assets/card.png
-  - assets/avatar_app.png
-  - .env
+    - assets/avatar.png
+    - assets/mastercard.svg
+    - assets/sent.svg
+    - assets/receive.svg
+    - assets/loan.svg
+    - assets/sent2.svg
+    - assets/sent1.svg
+    - assets/logo_app.png
+    - assets/splash_img.png
+    - assets/splash_imgg.png
+    - assets/splash_imggg.png
+    - assets/card.png
+    - assets/avatar_app.png
+    - .env
+    - assets/user.png

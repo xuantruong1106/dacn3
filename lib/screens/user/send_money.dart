@@ -23,7 +23,9 @@ class SendMoneyScreen extends StatelessWidget {
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -170,19 +172,20 @@ class SendMoneyScreen extends StatelessWidget {
                     // Contact Avatars
                     ...['Yamilet', 'Alexa', 'Yakub', 'Krishna']
                         .map((name) => Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundImage: NetworkImage(
-                                'https://v0.dev/placeholder.svg'),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(name),
-                        ],
-                      ),
-                    ))
+                              padding: const EdgeInsets.only(right: 16),
+                              child: Column(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage: Image.asset(
+                                      'assets/user.png',
+                                    ).image,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(name),
+                                ],
+                              ),
+                            ))
                         .toList(),
                   ],
                 ),

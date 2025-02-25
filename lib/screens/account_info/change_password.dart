@@ -41,7 +41,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),

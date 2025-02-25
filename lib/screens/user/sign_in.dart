@@ -29,7 +29,7 @@ class _SignInScreenState extends State<SignInScreen> {
     try {
       await widget.db.connect();
       final results = await widget.db.executeQuery(
-        'select * from check_account_credentials(@phone, @password);',
+        'select check_account_credentials(@phone, @password);',
         substitutionValues: {
           'phone': phone,
           'password': password,
@@ -43,7 +43,11 @@ class _SignInScreenState extends State<SignInScreen> {
       return false;
     } catch (e) {
       // ignore: avoid_print
-      print('Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Database error: $e')),
+        );
+      }
       return false;
     } finally {
       await widget.db.connection?.close();
@@ -53,6 +57,14 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> _signIn() async {
     final phone = _phoneController.text;
     final password = _passwordController.text;
+
+    if (phone.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Phone number and password cannot be empty')),
+      );
+      return;
+    }
 
     final isValidUser = await _checkUserAccount(phone, password);
     if (!mounted) return;
@@ -113,9 +125,12 @@ class _SignInScreenState extends State<SignInScreen> {
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       hintText: '0123456789',
-                      hintStyle: TextStyle(color: Colors.grey.shade400),
-                      prefixIcon: Icon(Icons.phone, color: Colors.grey.shade400),
-                      border: InputBorder.none,
+                      prefixIcon:
+                          Icon(Icons.phone, color: Colors.grey.shade400),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
                       filled: true,
                       fillColor: Colors.grey.shade50,
                     ),
@@ -139,10 +154,13 @@ class _SignInScreenState extends State<SignInScreen> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline, color: Colors.grey.shade400),
+                      prefixIcon:
+                          Icon(Icons.lock_outline, color: Colors.grey.shade400),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                          _isPasswordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           color: Colors.grey.shade400,
                         ),
                         onPressed: () {
@@ -174,10 +192,9 @@ class _SignInScreenState extends State<SignInScreen> {
                   child: const Text(
                     'Sign In',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white),
                   ),
                 ),
               ),
