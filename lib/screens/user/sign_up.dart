@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:dacn3/connect/database_connect.dart';
 import 'package:dacn3/random_cvv_card_numbrer/utils.dart'; 
+import 'package:dacn3/connect/blockchain_service.dart';
 class SignUpScreen extends StatefulWidget {
   SignUpScreen({super.key});
   
@@ -19,6 +20,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isPasswordVisible = false;
   
 
   @override
@@ -32,6 +34,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<bool> _registerUser(String name, String password, String cardNumber, String cvv, String phone, String address) async {
     try {
+      print('Signing up... Bắt đầu quá trình đăng ký...');
+
+      await widget._blockchainService.init();
+      print('Signing up... Dịch vụ blockchain đã được khởi tạo thành công.');
+
+      String userAddress = "";
+      Map<String, dynamic> account = {};
+      
+      print('Signing up... Tạo tài khoản blockchain cho: $name');
+      userAddress = await widget._blockchainService.createAccount(name);
+      print(userAddress); 
+      
+      if(userAddress.isEmpty) {
+        return false;
+      }
+
       await widget.db.connect();
 
       final results = await widget.db.executeQuery(
@@ -39,8 +57,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         substitutionValues: {
           'name': name,
           'password': password,
-          'card_number': cardNumber, 
-          'card_holder_name': name, 
+          'card_number': userAddress,
           'cvv': cvv,
           'phone': phone,
           'address': address,
@@ -63,8 +80,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final phone = _phoneController.text.trim();
     final address = _addressController.text.trim();
     final password = _passwordController.text;
-    final cardNumber = generateRandomCardNumber(); //
+    final cardNumber = generateRandomCardNumber();
     final cvv = generateRandomCVV(); 
+    
 
     final isRegistered = await _registerUser(name, password, cardNumber, cvv, phone, address);
     if (!mounted) return;
@@ -281,7 +299,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
-}
+} 
