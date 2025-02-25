@@ -13,7 +13,7 @@ void main(List<String> arguments) async {
         scaffoldBackgroundColor: Colors.white,
       ),
       home: SafeArea(
-        child: Transactions(),
+        child: SignInScreen(),
       ),
       initialRoute: '/',
       onGenerateRoute: AppRouter.generateRoute,
