@@ -1,5 +1,5 @@
-import 'package:dacn3/screens/home_ui.dart';
-import 'package:dacn3/screens/user/home.dart';
+
+import 'package:dacn3/screens/user/home_2.dart';
 import 'package:dacn3/screens/user/send_money.dart';
 import 'package:dacn3/screens/user/statistics.dart';
 import 'package:flutter/material.dart';

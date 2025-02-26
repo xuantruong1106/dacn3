@@ -1,0 +1,32 @@
+{
+  "name": "dacn3",
+  "version": "1.0.0",
+  "description": "Project name: Đồ án chuyên ngành 3 - ứng dụng tài chình - công nghệ blockchain\r Author: Nguyễn Xuân Trường - Nguyễn Quốc An\r Technology used: flutter + blockchain + postgresql",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xuantruong1106/dacn3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xuantruong1106/dacn3/issues"
+  },
+  "homepage": "https://github.com/xuantruong1106/dacn3#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.18",
+    "hardhat-deploy": "^0.14.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.5"
+  }
+}

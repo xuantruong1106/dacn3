@@ -15,7 +15,7 @@ dependencies:
   google_fonts: ^6.2.1
   fl_chart: ^0.70.2
   web3dart: ^2.7.3
-  http: ^1.2.2
+  http: ^1.3.0
   flutter_dotenv: ^5.0.2
 
 dev_dependencies:
@@ -24,22 +24,23 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   mockito: ^5.4.2
   build_runner: ^2.4.6
+  test: ^1.24.0
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/avatar.png
-    - assets/mastercard.svg
-    - assets/sent.svg
-    - assets/receive.svg
-    - assets/loan.svg
-    - assets/sent2.svg
-    - assets/sent1.svg
-    - assets/logo_app.png
-    - assets/splash_img.png
-    - assets/splash_imgg.png
-    - assets/splash_imggg.png
-    - assets/card.png
-    - assets/avatar_app.png
-    - .env
-    - assets/user.png
+  - assets/avatar.png
+  - assets/mastercard.svg
+  - assets/sent.svg
+  - assets/receive.svg
+  - assets/loan.svg
+  - assets/sent2.svg
+  - assets/sent1.svg
+  - assets/logo_app.png
+  - assets/splash_img.png
+  - assets/splash_imgg.png
+  - assets/splash_imggg.png
+  - assets/card.png
+  - assets/avatar_app.png
+  - assets/AccountManager.json
+  - .env

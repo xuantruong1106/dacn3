@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-// import 'package:dacn3/screens/user/statistics.dart';
-// import 'package:dacn3/screens/account_info/settings.dart';
 import 'package:dacn3/screens/user/my_card.dart';
-// import 'package:dacn3/screens/user/home_2.dart';
 import 'package:dacn3/screens/user/sign_in.dart';
-// import 'package:dacn3/screens/user/welcome.dart';
 import 'package:dacn3/screens/user/sign_up.dart';
 import 'package:dacn3/screens/user/user.dart';
+import 'package:dacn3/screens/user/send_money.dart';
+import 'package:dacn3/screens/user/request_money.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    
-
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => CheckLoginScreen());
@@ -25,8 +21,14 @@ class AppRouter {
       case '/my_card':
         final int userId = settings.arguments as int;
         return MaterialPageRoute(builder: (_) => MyCardsScreen(userId: userId));
-      // case '/welcome':
-      //   return MaterialPageRoute(builder: (_) => WelcomeScreen());
+      // case '/sent':
+      //   return MaterialPageRoute(builder: (_) => SendMoneyScreen());
+      // case '/loan':
+      //   return MaterialPageRoute(builder: (_) => SendMoneyScreen());
+      // case 'moneylimit':
+      //   return MaterialPageRoute(builder: (_) => SendMoneyScreen());
+      case '/requestmoney':
+        return MaterialPageRoute(builder: (_) => RequestMoneyScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
@@ -48,7 +50,6 @@ class CheckLoginScreen extends StatelessWidget {
     // bool isLoggedIn = false; // Replace with your login state check
 
     Future.microtask(() => Navigator.pushReplacementNamed(context, '/welcome'));
-    
 
     return Scaffold(
       body: Center(child: CircularProgressIndicator()),
