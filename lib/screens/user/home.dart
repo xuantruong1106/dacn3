@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dacn3/connect/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class Home2 extends StatefulWidget {
+class Home extends StatefulWidget {
   final int userId;
-  Home2({super.key, required this.userId});
+  Home({super.key, required this.userId});
 
   final db = DatabaseConnection();
 
@@ -15,7 +15,7 @@ class Home2 extends StatefulWidget {
   }
 }
 
-class Home2State extends State<Home2> {
+class Home2State extends State<Home> {
   // late bool isLoading;
   late List<Map<String, dynamic>> dataUser;
   late List<Map<String, dynamic>> dataTransaction;
@@ -33,51 +33,61 @@ class Home2State extends State<Home2> {
 
   Future<void> getInfoUser() async {
     try {
-      await widget.db.connect();
-      // ignore: avoid_print
-      print(widget.userId);
+      if (widget.db.connection?.isClosed ?? true) {
+        await widget.db.connect();
+      }
+
+      print('Fetching user info for ID: ${widget.userId}');
+
       final results = await widget.db.executeQuery(
           'SELECT * FROM get_user_and_card_info(@id);',
           substitutionValues: {
             'id': widget.userId,
           });
       // ignore: avoid_print
-      print(results);
+      print('Query Results: $results');
 
-      setState(() {
-        dataUser = results
-            .map((row) => {
-                  'username': row[0],
-                  'phone': row[1],
-                  'address': row[2],
-                  'card_number': row[3],
-                  'cvv': row[4],
-                  'expiration_date': row[5]
-                      .toString()
-                      .substring(0, 10)
-                      .split('-')
-                      .reversed
-                      .join('/'),
-                  'total_amount': row[6],
-                })
-            .toList();
-      });
-    } catch (e) {
+      if (results.isNotEmpty) {
+        setState(() {
+          dataUser = results
+              .map((row) => {
+                    'username': row[0],
+                    'phone': row[1],
+                    'address': row[2],
+                    'card_number': row[3],
+                    'cvv': row[4],
+                    'expiration_date': row[5]
+                        .toString()
+                        .substring(0, 10)
+                        .split('-')
+                        .reversed
+                        .join('/'),
+                    'total_amount': row[6],
+                  })
+              .toList();
+        });
+      } else {
+        print('No user data found for ID: ${widget.userId}');
+      }
+    } catch (e, stackTrace) {
       // ignore: avoid_print
-      print('Error: $e');
+      print('Error fetching user info: $e');
+      print('Stack trace: $stackTrace');
     } finally {
-      await widget.db.connection?.close();
-      // ignore: avoid_print
-      print('Connection closed for getInfoUser');
+      if (widget.db.connection?.isClosed == false) {
+        await widget.db.connection?.close();
+        print('Database connection closed');
+      }
     }
   }
 
   Future? getInfoTransaction() async {
     try {
-      await widget.db.connect();
+      if (widget.db.connection?.isClosed ?? true) {
+        await widget.db.connect();
+      }
 
-      // ignore: avoid_print
-      print('Connected to the database');
+      print('Fetching transaction info for user ID: ${widget.userId}');
 
       final results = await widget.db.executeQuery(
           'SELECT * FROM get_basic_transaction_info(@id);',
@@ -85,27 +95,32 @@ class Home2State extends State<Home2> {
             'id': widget.userId,
           });
 
-      setState(() {
-        if (dataTransaction.isEmpty) {
-          dataTransaction = results
-              .map((row) => {
-                    'type_transaction': row[1],
-                    'transaction_amount': row[2],
-                    'category_name': row[3],
-                    'icon': row[4],
-                  })
-              .toList();
-        }
-      });
+      if (results.isNotEmpty) {
+        setState(() {
+          if (dataTransaction.isEmpty) {
+            dataTransaction = results
+                .map((row) => {
+                      'type_transaction': row[1],
+                      'transaction_amount': row[2],
+                      'category_name': row[3],
+                      'icon': row[4],
+                    })
+                .toList();
+          }
+        });
+      } else {
+        print("No transaction data found for user ID: ${widget.userId}");
+      }
       // ignore: avoid_print
-      print(dataTransaction);
-    } catch (e) {
-      // ignore: avoid_print
-      print('Error: $e');
+      print('Transaction Data: $dataTransaction');
+    } catch (e, stackTrace) {
+      print('Error fetching transaction data: $e');
+      print('Stack trace: $stackTrace');
     } finally {
-      await widget.db.connection?.close();
-      // ignore: avoid_print
-      print('Connection closed for getInfoTransaction');
+      if (widget.db.connection?.isClosed == false) {
+        await widget.db.connection?.close();
+        print('Database connection closed');
+      }
     }
   }
 
@@ -116,14 +131,17 @@ class Home2State extends State<Home2> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         toolbarHeight: 70.0,
-        leading: Container(
-          margin: const EdgeInsets.only(left: 20, top: 15),
-          width: 60,
-          height: 60,
-          child: CircleAvatar(
-            radius: 30,
-            child: Image.asset(
-              "assets/avatar.png",
+        leading: GestureDetector(
+          onTap: () {},
+          child: Container(
+            margin: const EdgeInsets.only(left: 20, top: 15),
+            width: 60,
+            height: 60,
+            child: CircleAvatar(
+              radius: 30,
+              child: Image.asset(
+                "assets/user.png",
+              ),
             ),
           ),
         ),
@@ -307,13 +325,25 @@ class Home2State extends State<Home2> {
             // Action Buttons
             Padding(
               padding:
-                  const EdgeInsets.only(top: 20.0, left: 32.0, right: 32.0),
+                  const EdgeInsets.only(top: 20.0, left: 80.0, right: 80.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildActionButton(Icons.arrow_upward, 'Sent'),
-                  _buildActionButton(Icons.attach_money, 'Loan'),
-                  _buildActionButton(Icons.add, 'Money Limit'),
+                  _buildActionButton(
+                      Icons.arrow_upward,
+                      'Sent',
+                      () => Navigator.pushNamed(context, '/send_money',
+                          arguments: widget.userId)),
+                  _buildActionButton(
+                      Icons.attach_money,
+                      'Loan',
+                      () => Navigator.pushNamed(context, '/my_card',
+                          arguments: widget.userId)),
+                  _buildActionButton(
+                      Icons.add,
+                      'Money Limit',
+                      () => Navigator.pushNamed(context, '/my_card',
+                          arguments: widget.userId)),
                 ],
               ),
             ),
@@ -451,16 +481,20 @@ class Home2State extends State<Home2> {
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label) {
+  Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            shape: BoxShape.circle,
+        InkWell(
+          onTap: onTap, // Gán sự kiện click
+          borderRadius: BorderRadius.circular(50), // Bo góc khi click
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.black),
           ),
-          child: Icon(icon, color: Colors.black),
         ),
         const SizedBox(height: 8),
         Text(

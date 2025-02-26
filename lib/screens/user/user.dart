@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dacn3/screens/user/statistics.dart';
 import 'package:dacn3/screens/account_info/settings.dart';
 import 'package:dacn3/screens/user/my_card.dart';
-import 'package:dacn3/screens/user/home_2.dart';
+import 'package:dacn3/screens/user/home.dart';
 
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +21,6 @@ void main(List<String> arguments) async {
 }
 
 class UserScreen extends StatefulWidget {
-
   final int userId;
 
   const UserScreen({super.key, required this.userId});
@@ -40,7 +39,7 @@ class _UserScreenState extends State<UserScreen> {
   void initState() {
     super.initState();
     _widgetOptions = <Widget>[
-      Home2(userId: widget.userId),
+      Home(userId: widget.userId),
       MyCardsScreen(userId: widget.userId),
       StatisticsScreen(),
       SettingsScreen(),

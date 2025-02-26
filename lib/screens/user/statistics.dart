@@ -131,26 +131,6 @@ class StatisticsScreen extends StatelessWidget {
             ),
 
             const Spacer(),
-
-            // Bottom Navigation
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Colors.grey[200]!),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavItem(Icons.home, 'Home', true),
-                    _buildNavItem(Icons.pie_chart_outline, 'Statistics', false),
-                    _buildNavItem(Icons.settings, 'Settings', false),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
       ),

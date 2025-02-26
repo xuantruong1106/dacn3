@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,7 +13,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late List<Map<String, dynamic>> dataTrancsaction;
 
   @override
-   void initState() {
+  void initState() {
     super.initState();
     // isLoading = true;
   }
@@ -31,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundImage: NetworkImage('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-0GQW8xVIACwFBvFQTjpKLr8hblFC6y.png'),
+                    backgroundImage: Image.asset('assets/user.png').image,
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -115,10 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             SizedBox(width: 8),
-                            Text(
-                              'Mastercard',
-                              style: TextStyle(color: Colors.white),
-                            ),
+                            
                           ],
                         ),
                       ],
@@ -130,12 +128,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // Action Buttons
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 50),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildActionButton(Icons.arrow_upward, 'Sent'),
-                  _buildActionButton(Icons.arrow_downward, 'Receive'),
                   _buildActionButton(Icons.attach_money, 'Loan'),
                   _buildActionButton(Icons.add, 'Topup'),
                 ],

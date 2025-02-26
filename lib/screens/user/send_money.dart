@@ -1,7 +1,11 @@
+import 'package:dacn3/connect/database_connect.dart';
 import 'package:flutter/material.dart';
 
 class SendMoneyScreen extends StatelessWidget {
-  const SendMoneyScreen({Key? key}) : super(key: key);
+  final int userId;
+  SendMoneyScreen({super.key, required this.userId});
+
+  final db = DatabaseConnection();
 
   @override
   Widget build(BuildContext context) {

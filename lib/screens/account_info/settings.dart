@@ -1,3 +1,5 @@
+import 'package:dacn3/screens/account_info/change_password.dart';
+import 'package:dacn3/screens/account_info/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -18,7 +20,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const BackButton(color: Colors.black),
+        leading: BackButton(
+          color: Colors.black,
+          onPressed: () => Navigator.pop(context), 
+        ),
         title: const Text(
           'Settings',
           style: TextStyle(
@@ -68,7 +73,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildListItem(
             title: 'My Profile',
             trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const ProfileScreen();
+              }));
+            },
           ),
           _buildListItem(
             title: 'Contact Us',
@@ -88,7 +97,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildListItem(
             title: 'Change Password',
             trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const ChangePasswordScreen();
+              }));
+            },
           ),
           _buildListItem(
             title: 'Privacy Policy',
