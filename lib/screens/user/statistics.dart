@@ -139,17 +139,17 @@ class StatisticsScreen extends StatelessWidget {
                   top: BorderSide(color: Colors.grey[200]!),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavItem(Icons.home, 'Home', true),
-                    _buildNavItem(Icons.pie_chart_outline, 'Statistics', false),
-                    _buildNavItem(Icons.settings, 'Settings', false),
-                  ],
-                ),
-              ),
+              // child: Padding(
+              //   padding: const EdgeInsets.symmetric(vertical: 16.0),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+              //     children: [
+              //       _buildNavItem(Icons.home, 'Home', true),
+              //       _buildNavItem(Icons.pie_chart_outline, 'Statistics', false),
+              //       _buildNavItem(Icons.settings, 'Settings', false),
+              //     ],
+              //   ),
+              // ),
             ),
           ],
         ),
@@ -177,25 +177,25 @@ class StatisticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool isSelected) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: isSelected ? Colors.blue : Colors.grey,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.blue : Colors.grey,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildNavItem(IconData icon, String label, bool isSelected) {
+  //   return Column(
+  //     mainAxisSize: MainAxisSize.min,
+  //     children: [
+  //       Icon(
+  //         icon,
+  //         color: isSelected ? Colors.blue : Colors.grey,
+  //       ),
+  //       const SizedBox(height: 4),
+  //       Text(
+  //         label,
+  //         style: TextStyle(
+  //           color: isSelected ? Colors.blue : Colors.grey,
+  //           fontSize: 12,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 }
 
 class CircularProgressPainter extends CustomPainter {

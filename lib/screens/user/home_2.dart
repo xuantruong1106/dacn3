@@ -231,7 +231,7 @@ class Home2State extends State<Home2> {
                     left: 20,
                     child: Text(
                       dataUser.isNotEmpty
-                          ? "${dataUser[0]['card_number']}"
+                          ? "${dataUser[0]['phone']}"
                           : '0000 0000 0000 0000', // Cardholder name
                       style: TextStyle(
                         color: Colors.white,
@@ -311,9 +311,31 @@ class Home2State extends State<Home2> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildActionButton(Icons.arrow_upward, 'Sent'),
-                  _buildActionButton(Icons.attach_money, 'Loan'),
-                  _buildActionButton(Icons.add, 'Money Limit'),
+                  // _buildActionButton(Icons.arrow_upward, 'Sent'),
+                  // _buildActionButton(Icons.attach_money, 'Loan'),
+                  // _buildActionButton(Icons.add, 'Money Limit'),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      try {
+                        Navigator.pushReplacementNamed(context, '/sent');
+                      } catch (e) {
+                        // ignore: avoid_print
+                        print('Error sign in -  Navigator.pushNamed(context, /sent): $e');
+                      }
+                    },
+                    icon: Icon(Icons.arrow_upward),
+                    label: Text('Sent'),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.attach_money),
+                    label: Text('Loan'),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.add),
+                    label: Text('Money Limit'),
+                  ),
                 ],
               ),
             ),

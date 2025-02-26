@@ -25,4 +25,27 @@ contract AccountManager {
     function getAccount(address user) public view returns (string memory, bool) {
         return (accounts[user].name, accounts[user].isRegistered);
     }
+
+    // Sự kiện để log giao dịch chuyển tiền
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+
+    // Hàm nạp tiền vào hợp đồng
+    receive() external payable {}
+
+    // Hàm chuyển tiền
+    function transfer(address payable recipient, uint256 amount) public {
+        require(address(this).balance >= amount, "Insufficient contract balance");
+        require(recipient != address(0), "Invalid recipient address");
+
+        // Chuyển tiền
+        recipient.transfer(amount);
+
+        // Ghi log sự kiện
+        emit Transfer(msg.sender, recipient, amount);
+    }
+
+    // Hàm kiểm tra số dư của hợp đồng
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
 }

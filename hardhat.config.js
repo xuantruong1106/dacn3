@@ -6,7 +6,8 @@ module.exports = {
   networks: {
     hardhat: {
       gas: 12000000,  // Giới hạn gas
-      blockGasLimit: 12000000,  // Giới hạn gas của block
+      blockGasLimit: 12000000,
+  // Giới hạn gas của block
     },
   }
 };
