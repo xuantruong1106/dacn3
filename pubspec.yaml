@@ -45,4 +45,5 @@ flutter:
   - assets/card.png
   - assets/avatar_app.png
   - assets/AccountManager.json
+  - assets/user.png
   - .env

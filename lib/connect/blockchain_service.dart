@@ -119,6 +119,13 @@ Future<BigInt> getBalance(String address) async {
 
           print("Tạo tài khoản blockchain thành công, TX: $txHash");
 
+          String fixPrivateKey(String privateKeyHex) {
+            // Nếu dài hơn 64 ký tự, lấy 64 ký tự cuối cùng
+            return privateKeyHex.length > 64 
+                ? privateKeyHex.substring(privateKeyHex.length - 64) 
+                : privateKeyHex;
+          }
+
           return [ '$newAddress', '$privateKeyHex'];
 
     } catch (e) {

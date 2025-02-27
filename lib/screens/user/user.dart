@@ -41,7 +41,7 @@ class _UserScreenState extends State<UserScreen> {
     _widgetOptions = <Widget>[
       Home(userId: widget.userId),
       MyCardsScreen(userId: widget.userId),
-      StatisticsScreen(),
+      StatisticsScreen(userId: widget.userId),
       SettingsScreen(),
     ];
   }
