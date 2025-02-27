@@ -7,12 +7,8 @@ class Home extends StatefulWidget {
   final int userId;
   Home({super.key, required this.userId});
 
-  final db = DatabaseConnection();
-
   @override
-  State<StatefulWidget> createState() {
-    return Home2State();
-  }
+  State<StatefulWidget> createState() =>Home2State();
 }
 
 class Home2State extends State<Home> {
@@ -225,7 +221,7 @@ class Home2State extends State<Home> {
                     left: 20,
                     child: Text(
                       dataUser.isNotEmpty
-                          ? "${dataUser[0]['phone']}"
+                          ? "${widget.userId}"
                           : '0000 0000 0000 0000', // Cardholder name
                       style: TextStyle(
                         color: Colors.white,

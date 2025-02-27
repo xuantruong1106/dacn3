@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:dacn3/connect/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MyCardsScreen extends StatefulWidget {
   final int userId;
   MyCardsScreen({super.key, required this.userId});
 
-  // final db = DatabaseConnection();
   @override
   State<MyCardsScreen> createState() => _MyCardsScreenState();
 }
@@ -14,39 +14,81 @@ class MyCardsScreen extends StatefulWidget {
 class _MyCardsScreenState extends State<MyCardsScreen> {
   double _sliderValue = 4600;
   late List<Map<String, dynamic>> dataUser;
+  late List<Map<String, dynamic>> dataTransaction;
+
   @override
   void initState() {
     super.initState();
     dataUser = [];
-    getInfoUser();
+    dataTransaction = [];
+    getInfoUser().then((_) {
+      getInfoTransaction();
+    });
   }
 
-  Future<void> getInfoUser() async {
+Future<void> getInfoUser() async {
     try {
       await DatabaseConnection().connect();
+      print(widget.userId);
       final results = await DatabaseConnection().executeQuery(
           'SELECT * FROM get_user_and_card_info(@id);',
           substitutionValues: {
             'id': widget.userId,
           });
+      // ignore: avoid_print
+      print('Query Results: $results');
+
+      if (results.isNotEmpty) {
+        setState(() {
+          dataUser = results
+              .map((row) => {
+                    'username': row[0],
+                    'phone': row[1],
+                    'address': row[2],
+                    'card_number': row[3],
+                    'cvv': row[4],
+                    'expiration_date': row[5]
+                        .toString()
+                        .substring(0, 10)
+                        .split('-')
+                        .reversed
+                        .join('/'),
+                    'total_amount': row[6],
+                  })
+              .toList();
+        });
+      } else {
+        print('No user data found for ID: ${widget.userId}');
+      }
+    } catch (e, stackTrace) {
+      // ignore: avoid_print
+      print('Error: $e');
+    }
+  }
+
+  Future? getInfoTransaction() async {
+    try {
+      await DatabaseConnection().connect();
+
+      print('Fetching transaction info for user ID: ${widget.userId}');
+
+      final results = await DatabaseConnection().executeQuery(
+          'SELECT * FROM get_basic_transaction_info(@id);',
+          substitutionValues: {
+            'id': widget.userId,
+          });
 
       setState(() {
-        dataUser = results
-            .map((row) => {
-                  'username': row[0],
-                  'phone': row[1],
-                  'address': row[2],
-                  'card_number': row[3],
-                  'cvv': row[4],
-                  'expiration_date': row[5]
-                      .toString()
-                      .substring(0, 10)
-                      .split('-')
-                      .reversed
-                      .join('/'),
-                  'total_amount': row[6],
-                })
-            .toList();
+        if (dataTransaction.isEmpty) {
+          dataTransaction = results
+              .map((row) => {
+                    'type_transaction': row[1],
+                    'transaction_amount': row[2],
+                    'category_name': row[3],
+                    'icon': row[4],
+                  })
+              .toList();
+        }
       });
     } catch (e) {
       // ignore: avoid_print
@@ -80,10 +122,10 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(
+         child: Column(
         children: [
-          // Credit Card
+          // ATM Card Section
           Container(
             width: 375.0,
             height: 200.0,
@@ -132,7 +174,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                   top: 110,
                   left: 20,
                   child: Text(
-                    "${dataUser[0]['phone']}", // Cardholder name
+                    "${widget.userId}", // Cardholder name
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -202,28 +244,110 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
           ),
           const SizedBox(height: 24),
 
-          // Transactions
-          ...[
-            _buildTransactionItem(
-              icon: Icons.apple,
-              title: 'Apple Store',
-              subtitle: 'Entertainment',
-              amount: '-\$5.99',
+          // Transactions List
+            Expanded(
+              // ignore: unnecessary_null_comparison
+              child: dataTransaction.isNotEmpty
+                  ? ListView.builder(
+                      padding: const EdgeInsets.all(20.0),
+                      itemCount: dataTransaction.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 10.0, left: 20.0),
+                          child: Row(
+                            children: [
+                              // display category name
+                              Text(
+                                '${dataTransaction[index]['icon']}',
+                                style: GoogleFonts.roboto(
+                                  textStyle: TextStyle(
+                                      fontSize: 40, color: Colors.black),
+                                ),
+                              ),
+                              Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 5.0, left: 10.0),
+                                  child: Row(
+                                    children: [
+                                      dataTransaction.isNotEmpty
+                                          ? Text(
+                                              '${dataTransaction[index]['category_name']}',
+                                              style: GoogleFonts.roboto(
+                                                textStyle: TextStyle(
+                                                    fontSize: 20,
+                                                    color: Colors.black),
+                                              ),
+                                            )
+                                          : Text(
+                                              "No Data",
+                                              style: GoogleFonts.roboto(
+                                                textStyle: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.red),
+                                              ),
+                                            ),
+                                    ],
+                                  )),
+                              Spacer(),
+                              // 0: income, 1: expense
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Row(
+                                  children: [
+                                    dataTransaction[index]
+                                                ['type_transaction'] ==
+                                            0
+                                        ? Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 20.0, left: 2.0),
+                                            child: Text(
+                                              '\$${dataTransaction[index]['transaction_amount']}',
+                                              style: GoogleFonts.roboto(
+                                                textStyle: TextStyle(
+                                                  fontSize: 18,
+                                                  color: dataTransaction[0][
+                                                              'type_transaction'] ==
+                                                          0
+                                                      ? Colors.black
+                                                      : Color(0xFF0066FF),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 20.0, left: 2.0),
+                                            child: Text(
+                                              '-\$${dataTransaction[index]['transaction_amount']}',
+                                              style: GoogleFonts.roboto(
+                                                textStyle: TextStyle(
+                                                  fontSize: 18,
+                                                  color: dataTransaction[index][
+                                                              'type_transaction'] ==
+                                                          0
+                                                      ? Colors.black
+                                                      : Color(0xFF0066FF),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Text(
+                        "No Data",
+                        style: GoogleFonts.roboto(
+                          textStyle: TextStyle(fontSize: 16, color: Colors.red),
+                        ),
+                      ),
+                    ),
             ),
-            _buildTransactionItem(
-              icon: Icons.music_note,
-              title: 'Spotify',
-              subtitle: 'Music',
-              amount: '-\$12.99',
-            ),
-            _buildTransactionItem(
-              icon: Icons.shopping_cart,
-              title: 'Grocery',
-              subtitle: 'Shopping',
-              amount: '-\$88',
-            ),
-          ],
-          const SizedBox(height: 24),
 
           // Monthly spending limit
           const Text(
@@ -287,6 +411,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

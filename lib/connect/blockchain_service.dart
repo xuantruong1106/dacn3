@@ -8,7 +8,7 @@ import 'package:http/io_client.dart';
 import 'dart:typed_data';
 
 class BlockchainService {
-  final String rpcUrl = "http://localhost:8545";
+  final String rpcUrl = "http://10.0.2.2:8545";
   final String privateKey = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
   final String contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
