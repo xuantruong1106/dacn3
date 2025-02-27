@@ -1,9 +1,200 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:dacn3/connect/database_connect.dart';
+import 'package:dacn3/random_cvv_card_numbrer/utils.dart';
 
-class RequestMoneyScreen extends StatelessWidget {
-  const RequestMoneyScreen({Key? key}) : super(key: key);
+class RequestMoneyScreen extends StatefulWidget {
+   final int userId;
+   final String username;
+  RequestMoneyScreen({super.key, required this.userId,  required this.username });
+  // final db = DatabaseConnection();
+  @override
+  State<RequestMoneyScreen> createState() => _RequestMoneyScreenState();
+}
 
+
+class _RequestMoneyScreenState extends State<RequestMoneyScreen> {
+
+  final _receiverAddressController = TextEditingController();
+  final _mount = TextEditingController();
+  final _mess = TextEditingController(); 
+
+  late List<Map<String, dynamic>> dataUser;
+  late String ReceiverName = '';
+  late List<Map<String, dynamic>> _category;
+  String? _selectedCategory;
+  int? _selectedCategoryId;
+  String? error = '';
+  
+  @override
+  void initState() {
+    super.initState();
+    dataUser = [];
+    _category = [];
+    getCardInfo();
+    getCategory();
+  }
+ @override
+  void dispose() {
+    _receiverAddressController.dispose();
+    _mount.dispose();
+    super.dispose();
+  }
+
+
+Future<void> getCategory() async {
+    try {
+
+      final result = await DatabaseConnection().executeQuery(''' 
+        SELECT id, name_category 
+        FROM categories
+        where type_category = 0''');
+      
+      print('getCategory: $result');
+
+        setState(() {
+          _category = result.map<Map<String, dynamic>>((e) => {
+            'id': e[0], // ID của category
+            'name': e[1].toString(), // Tên của category
+          }).toList();
+        });
+
+       print('getCategory: $_category');
+
+      // await DatabaseConnection().close();
+    } catch (e){
+      print('getCategory-error: $e');
+    }
+}
+
+Future<void> getCardInfo() async{
+   try {
+      print('getCardInfo: ${widget.userId}');
+      await DatabaseConnection().connect();
+      final results = await DatabaseConnection().executeQuery(
+        'SELECT * FROM get_cards_by_account(@id);',
+      substitutionValues: {
+            'id': widget.userId,
+      });
+
+      if(results.isEmpty){
+        print('result empty');
+        return;
+      }
+
+      setState(() { 
+        dataUser = results.map((row) => {
+          'id': row[0],
+          'card_number': row[1],
+          'private_key': row[2],
+          'total_amount': row[3],
+        }).toList();
+      });
+  } catch(e)
+  {
+    print('getCardInfo-error: $e');
+  }
+}
+
+Future<void> getReceiverAddress(int receiverAddress) async {
+    try {
+      await DatabaseConnection().connect();
+      final results = await DatabaseConnection().executeQuery(
+        'SELECT * FROM get_receviername(@address);',
+        substitutionValues: {
+          'address': receiverAddress,
+    });
+
+     if(results.isEmpty){
+       print('result empty');
+     }
+     print(results[0][0]);
+    setState(() {
+      ReceiverName = results.isNotEmpty ? results[0][0] as String: '';
+    });
+  } catch (e) {
+    print('getReceiverAddress-error: $e');
+  }
+}
+
+Future<void> check_balance(int id, double mount) async{
+  try {
+      await DatabaseConnection().connect();
+      final results = await DatabaseConnection().executeQuery(
+        'SELECT * FROM check_balance(@id, @mount);',
+        substitutionValues: {
+          'id': widget.userId,
+          'mount': mount
+    });
+
+     if (results.isNotEmpty && results[0][0] == false) {
+    // Hiển thị cảnh báo số dư không đủ
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cảnh báo'),
+          content: const Text('Số dư không đủ để thực hiện giao dịch.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  } else {
+    // Thực hành giao dịch
+    print('check_balance: $mount');
+    sendMoney(mount);
+  }
+  } catch (e) {
+    print('getReceiverAddress-error: $e');
+  }
+}
+
+Future<void> sendMoney(double _mount2) async{
+      try {
+          await DatabaseConnection().connect();
+
+          print('''  SELECT insert_transaction(
+                ${0}, 
+                '${generateRandomhash().toString()}', 
+                ${int.tryParse(_receiverAddressController.text)}, 
+                '${ReceiverName.replaceAll("'", "''")}', 
+                ${widget.userId}, 
+                '${widget.username.replaceAll("'", "''")}', 
+                ${_mount2}, 
+                '${_mess.text.isNotEmpty ? _mess.text.replaceAll("'", "''") : "No message"}', 
+                ${_selectedCategoryId}, 
+                ${dataUser[0]['id']}
+              );''');
+
+          final results = await DatabaseConnection().executeQuery('''
+              SELECT insert_transaction(
+                ${0}, 
+                '${generateRandomhash().toString()}', 
+                ${int.tryParse(_receiverAddressController.text)}, 
+                '${ReceiverName.replaceAll("'", "''")}', 
+                ${widget.userId}, 
+                '${widget.username.replaceAll("'", "''")}', 
+                ${_mount2}, 
+                '${_mess.text.isNotEmpty ? _mess.text.replaceAll("'", "''") : "No message"}', 
+                ${_selectedCategoryId}, 
+                ${dataUser[0]['id']}
+              );
+          ''');
+
+          if(results.isNotEmpty){
+             Navigator.pushReplacementNamed(context, '/main',  arguments: widget.userId);
+          }
+    } catch (e) {
+      print('sendMoney-error: $e');
+    }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,27 +235,32 @@ class RequestMoneyScreen extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Form Fields
-              const Text(
-                'Payer Name',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
+                const Text(
+                  'Receiver Address',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                  ),
                 ),
-              ),
               TextField(
+                controller: _receiverAddressController,
                 decoration: InputDecoration(
-                  hintText: 'Tanya Myroniuk',
+                  hintText: '1228',
                   prefixIcon:
                       Icon(Icons.person_outline, color: Colors.grey[400]),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey[300]!),
                   ),
                 ),
+                 keyboardType: TextInputType.number, // Giới hạn nhập số
+                  onSubmitted: (_receiverAddressController) {
+                    getReceiverAddress(int.tryParse(_receiverAddressController) ?? 0); // Gọi hàm khi nhấn Enter
+                  },
               ),
               const SizedBox(height: 24),
 
               const Text(
-                'Email Address',
+                'Receiver Name',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 16,
@@ -72,8 +268,8 @@ class RequestMoneyScreen extends StatelessWidget {
               ),
               TextField(
                 decoration: InputDecoration(
-                  hintText: 'tanya.myroniuk@gmail.com',
-                  prefixIcon: Icon(Icons.mail_outline, color: Colors.grey[400]),
+                  hintText: '$ReceiverName',
+                  prefixIcon: Icon(Icons.person_outline, color: Colors.grey[400]),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey[300]!),
                   ),
@@ -82,17 +278,18 @@ class RequestMoneyScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               const Text(
-                'Description',
+                'Content',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 16,
                 ),
               ),
               TextField(
+                controller: _mess,
                 decoration: InputDecoration(
                   hintText: 'Tanya Myroniuk',
                   prefixIcon:
-                      Icon(Icons.person_outline, color: Colors.grey[400]),
+                      Icon(Icons.title, color: Colors.grey[400]),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey[300]!),
                   ),
@@ -100,60 +297,42 @@ class RequestMoneyScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              const Text(
-                'Monthly Due By',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: '28',
-                        border: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
+                  const Text(
+                    'Category',
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: '09',
-                        border: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: InputDecoration(
+                      border: UnderlineInputBorder( borderSide: BorderSide(color: Colors.white),),
+                      prefixIcon: Icon(Icons.title, color: Colors.grey[400]),
                     ),
+                    dropdownColor: Colors.white,
+                    items: _category.map((category) {
+                      return DropdownMenuItem<String>(
+                        value: category['name'],
+                        child: Text(category['name']),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedCategory = newValue;
+                        _selectedCategoryId = _category.firstWhere(
+                          (element) => element['name'] == newValue)['id'];
+                      });
+                      print('Selected ID: $_selectedCategoryId');
+                    },
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: '2000',
-                        border: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
-              const SizedBox(height: 32),
+
+        
 
               // Amount Input
               Container(
@@ -176,7 +355,8 @@ class RequestMoneyScreen extends StatelessWidget {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                          },
                           child: const Text(
                             'Change Currency?',
                             style: TextStyle(
@@ -200,6 +380,7 @@ class RequestMoneyScreen extends StatelessWidget {
                         const SizedBox(width: 16),
                         Expanded(
                           child: TextField(
+                            controller: _mount,
                             keyboardType:
                                 TextInputType.numberWithOptions(decimal: true),
                             style: const TextStyle(
@@ -221,12 +402,31 @@ class RequestMoneyScreen extends StatelessWidget {
 
               const Spacer(),
 
+              Text(
+                (error ?? '').isNotEmpty ? error! : ' ',
+                style: TextStyle(color: Colors.red, fontSize: 14),
+              ),
+
+              const Spacer(),
+
               // Send Money Button
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                      double? amount = double.tryParse(_mount.text);
+                      if (amount != null) {
+                        setState(() {
+                          error = ' ';
+                        });
+                        check_balance(widget.userId, amount);
+                      } else {
+                        setState(() {
+                          error = 'Please enter a valid amount.';
+                        });
+                      } 
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(

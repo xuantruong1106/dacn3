@@ -8,7 +8,6 @@ import 'package:dacn3/random_cvv_card_numbrer/utils.dart';
 class SignUpScreen extends StatefulWidget {
   SignUpScreen({super.key});
   
-  final db = DatabaseConnection();
   final BlockchainService _blockchainService = BlockchainService();
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -41,7 +40,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       print('Signing up... Dịch vụ blockchain đã được khởi tạo thành công.');
 
        List<String> userAddress = [];
-      // Map<String, dynamic> account = {};
       
       print('Signing up... Tạo tài khoản blockchain cho: $name');
 
@@ -53,9 +51,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return false;
        }
 
-      await widget.db.connect();
-
-      final results = await widget.db.executeQuery(
+      final results = await DatabaseConnection().executeQuery(
         'SELECT * FROM create_account_and_card3(@name, @password, @card_number, @private_key, @cvv, @phone, @address);',
         substitutionValues: {
           'name': name,
@@ -69,7 +65,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
       print('Signing up... Database operation result: $results');
 
-      await widget.db.connection?.close();
+      await DatabaseConnection().close();
       return results.isNotEmpty;
     } catch (e) {
       print('Signing up... Registration error: $e');

@@ -21,14 +21,20 @@ class AppRouter {
       case '/my_card':
         final int userId = settings.arguments as int;
         return MaterialPageRoute(builder: (_) => MyCardsScreen(userId: userId));
-      // case '/sent':
-      //   return MaterialPageRoute(builder: (_) => SendMoneyScreen());
-      // case '/loan':
-      //   return MaterialPageRoute(builder: (_) => SendMoneyScreen());
-      // case 'moneylimit':
-      //   return MaterialPageRoute(builder: (_) => SendMoneyScreen());
+      case '/sent':
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(builder: (_) => RequestMoneyScreen( userId: args['userId'] as int,
+                                                                      username: args['username'] as String,));
+      case '/loan':
+        final int userId = settings.arguments as int;
+        return MaterialPageRoute(builder: (_) => SendMoneyScreen(userId: userId));
+      case 'moneylimit':
+        final int userId = settings.arguments as int;
+        return MaterialPageRoute(builder: (_) => SendMoneyScreen(userId: userId));
       case '/requestmoney':
-        return MaterialPageRoute(builder: (_) => RequestMoneyScreen());
+       final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(builder: (_) => RequestMoneyScreen( userId: args['userId'] as int,
+                                                                      username: args['username'] as String,));
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
@@ -46,10 +52,8 @@ class CheckLoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Check login state here
-    // bool isLoggedIn = false; // Replace with your login state check
-
     Future.microtask(() => Navigator.pushReplacementNamed(context, '/welcome'));
+    
 
     return Scaffold(
       body: Center(child: CircularProgressIndicator()),

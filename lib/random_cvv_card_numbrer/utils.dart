@@ -8,3 +8,13 @@ String generateRandomCVV() {
   }
   return cvv;
 }
+
+
+String generateRandomhash() {
+  final random = Random();
+  String hash = '';
+  for (int i = 0; i < 12; i++) {
+    hash += random.nextInt(30).toString();
+  }
+  return hash;
+}

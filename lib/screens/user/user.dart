@@ -4,9 +4,9 @@ import 'package:dacn3/screens/account_info/settings.dart';
 import 'package:dacn3/screens/user/my_card.dart';
 import 'package:dacn3/screens/user/home_2.dart';
 
+
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
-
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,

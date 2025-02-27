@@ -6,7 +6,7 @@ class MyCardsScreen extends StatefulWidget {
   final int userId;
   MyCardsScreen({super.key, required this.userId});
 
-  final db = DatabaseConnection();
+  // final db = DatabaseConnection();
   @override
   State<MyCardsScreen> createState() => _MyCardsScreenState();
 }
@@ -23,8 +23,8 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
 
   Future<void> getInfoUser() async {
     try {
-      await widget.db.connect();
-      final results = await widget.db.executeQuery(
+      await DatabaseConnection().connect();
+      final results = await DatabaseConnection().executeQuery(
           'SELECT * FROM get_user_and_card_info(@id);',
           substitutionValues: {
             'id': widget.userId,
@@ -51,10 +51,6 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
     } catch (e) {
       // ignore: avoid_print
       print('Error: $e');
-    } finally {
-      await widget.db.connection?.close();
-      // ignore: avoid_print
-      print('Connection closed for getInfoUser');
     }
   }
 
@@ -124,7 +120,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                   top: 70,
                   left: 20,
                   child: Text(
-                    "${dataUser[0]['card_number']}", // Card number
+                    "\$${dataUser[0]['total_amount']}", // Card number
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -136,7 +132,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                   top: 110,
                   left: 20,
                   child: Text(
-                    "${dataUser[0]['card_number']}", // Cardholder name
+                    "${dataUser[0]['phone']}", // Cardholder name
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,

@@ -1,11 +1,59 @@
 import 'package:dacn3/connect/database_connect.dart';
 import 'package:flutter/material.dart';
+import 'package:dacn3/connect/database_connect.dart';
 
-class SendMoneyScreen extends StatelessWidget {
+class SendMoneyScreen extends StatefulWidget {
   final int userId;
   SendMoneyScreen({super.key, required this.userId});
+  // final db = DatabaseConnection();
+  @override
+  State<SendMoneyScreen> createState() => _SendMoneyScreenState();
+}
 
-  final db = DatabaseConnection();
+class _SendMoneyScreenState extends State<SendMoneyScreen> {
+
+  late List<Map<String, dynamic>> dataUser;
+  @override
+  void initState() {
+    super.initState();
+    dataUser = [];
+    getCardInfo();
+  }
+
+
+Future<void> getCardInfo() async{
+   try {
+      print('getCardInfo: ${widget.userId}');
+      await DatabaseConnection().connect();
+      final results = await DatabaseConnection().executeQuery(
+        'SELECT * FROM get_cards_by_account(@id);',
+      substitutionValues: {
+            'id': widget.userId,
+      });
+
+      if(results.isEmpty){
+        print('result empty');
+        return;
+      }
+
+      setState(() { 
+        dataUser = results.map((row) => {
+          'id': row[0],
+          'card_number': row[1],
+          'private_key': row[2],
+          'total_amount': row[3],
+        }).toList();
+      });
+
+      DatabaseConnection().close();
+
+  } catch(e)
+  {
+    print('getCardInfo-error: $e');
+  }
+
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -228,9 +276,9 @@ class SendMoneyScreen extends StatelessWidget {
                       ],
                     ),
                     Row(
-                      children: const [
+                      children: [
                         Text(
-                          'USD',
+                          'ETH',
                           style: TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
@@ -239,7 +287,7 @@ class SendMoneyScreen extends StatelessWidget {
                         ),
                         SizedBox(width: 16),
                         Text(
-                          '36.00',
+                          "${dataUser[0]['total_amount']}",
                           style: TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,

@@ -23,7 +23,6 @@ class Home2State extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // isLoading = true;
     dataUser = [];
     dataTransaction = [];
     getInfoUser().then((_) {
@@ -33,13 +32,10 @@ class Home2State extends State<Home> {
 
   Future<void> getInfoUser() async {
     try {
-      if (widget.db.connection?.isClosed ?? true) {
-        await widget.db.connect();
-      }
-
-      print('Fetching user info for ID: ${widget.userId}');
-
-      final results = await widget.db.executeQuery(
+      await DatabaseConnection().connect();
+      // ignore: avoid_print
+      print(widget.userId);
+      final results = await DatabaseConnection().executeQuery(
           'SELECT * FROM get_user_and_card_info(@id);',
           substitutionValues: {
             'id': widget.userId,
@@ -71,56 +67,41 @@ class Home2State extends State<Home> {
       }
     } catch (e, stackTrace) {
       // ignore: avoid_print
-      print('Error fetching user info: $e');
-      print('Stack trace: $stackTrace');
+      print('Error: $e');
     } finally {
-      if (widget.db.connection?.isClosed == false) {
-        await widget.db.connection?.close();
-        print('Database connection closed');
-      }
+      await widget.db.connection?.close();
+      // ignore: avoid_print
+      print('Connection closed for getInfoUser');
     }
   }
 
   Future? getInfoTransaction() async {
     try {
-      if (widget.db.connection?.isClosed ?? true) {
-        await widget.db.connect();
-      }
+      await DatabaseConnection().connect();
 
       print('Fetching transaction info for user ID: ${widget.userId}');
 
-      final results = await widget.db.executeQuery(
+      final results = await DatabaseConnection().executeQuery(
           'SELECT * FROM get_basic_transaction_info(@id);',
           substitutionValues: {
             'id': widget.userId,
           });
 
-      if (results.isNotEmpty) {
-        setState(() {
-          if (dataTransaction.isEmpty) {
-            dataTransaction = results
-                .map((row) => {
-                      'type_transaction': row[1],
-                      'transaction_amount': row[2],
-                      'category_name': row[3],
-                      'icon': row[4],
-                    })
-                .toList();
-          }
-        });
-      } else {
-        print("No transaction data found for user ID: ${widget.userId}");
-      }
+      setState(() {
+        if (dataTransaction.isEmpty) {
+          dataTransaction = results
+              .map((row) => {
+                    'type_transaction': row[1],
+                    'transaction_amount': row[2],
+                    'category_name': row[3],
+                    'icon': row[4],
+                  })
+              .toList();
+        }
+      });
+    } catch (e) {
       // ignore: avoid_print
-      print('Transaction Data: $dataTransaction');
-    } catch (e, stackTrace) {
-      print('Error fetching transaction data: $e');
-      print('Stack trace: $stackTrace');
-    } finally {
-      if (widget.db.connection?.isClosed == false) {
-        await widget.db.connection?.close();
-        print('Database connection closed');
-      }
+      print('Error: $e');
     }
   }
 
@@ -332,7 +313,10 @@ class Home2State extends State<Home> {
                   ElevatedButton.icon(
                     onPressed: () {
                       try {
-                        Navigator.pushReplacementNamed(context, '/sent');
+                        Navigator.pushReplacementNamed(context, '/sent',  arguments: {
+                          'userId': widget.userId,
+                          'username': dataUser[0]['username'],
+                        },);
                       } catch (e) {
                         // ignore: avoid_print
                         print(

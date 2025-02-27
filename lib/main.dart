@@ -5,10 +5,11 @@ import 'package:dacn3/screens/user/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:dacn3/screens/user/sign_in.dart';
 import 'package:dacn3/router.dart';
+import 'package:dacn3/connect/database_connect.dart';
 
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await DatabaseConnection().connect();
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,

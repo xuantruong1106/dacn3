@@ -1,43 +1,114 @@
+// import 'package:postgres/postgres.dart';
+
+// class DatabaseConnection {
+//   PostgreSQLConnection? connection;
+
+//   // khi chạy trên windows app: dùng host: localhost
+//   // khi chạy trên giả lập: dùng host: 10.0.2.2
+//   final String localhost = 'localhost';
+//   final int port = 5433;
+//   final String databaseName = 'dacn3';
+//   final String username = 'postgres';
+//   final String password = '12345';
+
+//   DatabaseConnection() {
+//     connection = PostgreSQLConnection(
+//       localhost,
+//       port,
+//       databaseName,
+//       username: username,
+//       password: password,
+//     );
+//   }
+
+//   Future<void> connect() async {
+//     if (connection == null || connection!.isClosed) {
+//       connection = PostgreSQLConnection(
+//         localhost,
+//         port,
+//         databaseName,
+//         username: username,
+//         password: password,
+//       );
+//     }
+//     await connection?.open();
+//   }
+
+//   Future<List<List<dynamic>>> executeQuery(String query, {Map<String, dynamic>? substitutionValues}) async {
+//     if (connection == null) {
+//       throw Exception('Database connection is not initialized.');
+//     }
+//     return await connection!.query(query, substitutionValues: substitutionValues);
+//   }
+// }
+
+
+
 import 'package:postgres/postgres.dart';
+import 'package:flutter/widgets.dart';
 
-class DatabaseConnection {
-  PostgreSQLConnection? connection;
+class DatabaseConnection with WidgetsBindingObserver {
+  static final DatabaseConnection _instance = DatabaseConnection._internal();
+  PostgreSQLConnection? _connection;
 
-  // khi chạy trên windows app: dùng host: localhost
-  // khi chạy trên giả lập: dùng host: 10.0.2.2
-  final String localhost = 'localhost';
-  final int port = 5434;
-  final String databaseName = 'dacn3';
-  final String username = 'postgres';
-  final String password = 'andubadao123';
+  final String _host = 'localhost'; // Dùng 'localhost' khi chạy trên Windows app
+  final int _port = 5433;
+  final String _databaseName = 'dacn3';
+  final String _username = 'postgres';
+  final String _password = '12345';
 
-  DatabaseConnection() {
-    connection = PostgreSQLConnection(
-      localhost,
-      port,
-      databaseName,
-      username: username,
-      password: password,
+  // Private constructor
+  DatabaseConnection._internal() {
+    _connection = PostgreSQLConnection(
+      _host,
+      _port,
+      _databaseName,
+      username: _username,
+      password: _password,
     );
   }
 
+  factory DatabaseConnection() => _instance;
+
+  // Kết nối database (chỉ mở kết nối khi cần)
   Future<void> connect() async {
-    if (connection == null || connection!.isClosed) {
-      connection = PostgreSQLConnection(
-        localhost,
-        port,
-        databaseName,
-        username: username,
-        password: password,
+    if (_connection == null || _connection!.isClosed) {
+      _connection = PostgreSQLConnection(
+        _host,
+        _port,
+        _databaseName,
+        username: _username,
+        password: _password,
       );
     }
-    await connection?.open();
+    if (_connection!.isClosed) {
+      await _connection!.open();
+      print("✅ Database Connected");
+    }
   }
 
+  // Thực hiện truy vấn
   Future<List<List<dynamic>>> executeQuery(String query, {Map<String, dynamic>? substitutionValues}) async {
-    if (connection == null) {
-      throw Exception('Database connection is not initialized.');
+    if (_connection == null || _connection!.isClosed) {
+      print("⚠️ Reconnecting to Database...");
+      await connect();
     }
-    return await connection!.query(query, substitutionValues: substitutionValues);
+    return await _connection!.query(query, substitutionValues: substitutionValues);
+  }
+
+  // Đóng kết nối khi không dùng nữa
+  Future<void> close() async {
+    if (_connection != null && !_connection!.isClosed) {
+      await _connection!.close();
+      print("🔌 Database Disconnected");
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached || state == AppLifecycleState.inactive) {
+      close();
+    }
   }
 }
+

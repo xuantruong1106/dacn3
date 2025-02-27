@@ -6,8 +6,6 @@ import 'package:flutter/services.dart';
 class SignInScreen extends StatefulWidget {
   SignInScreen({super.key});
 
-  final db = DatabaseConnection();
-
   @override
   State<SignInScreen> createState() => _SignInScreenState();
 }
@@ -27,8 +25,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<bool> _checkUserAccount(String phone, String password) async {
     try {
-      await widget.db.connect();
-      final results = await widget.db.executeQuery(
+      await DatabaseConnection().connect();
+      final results = await DatabaseConnection().executeQuery(
         'select check_account_credentials(@phone, @password);',
         substitutionValues: {
           'phone': phone,
@@ -49,8 +47,6 @@ class _SignInScreenState extends State<SignInScreen> {
         );
       }
       return false;
-    } finally {
-      await widget.db.connection?.close();
     }
   }
 
