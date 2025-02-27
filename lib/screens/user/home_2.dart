@@ -33,7 +33,6 @@ class Home2State extends State<Home> {
   Future<void> getInfoUser() async {
     try {
       await DatabaseConnection().connect();
-      // ignore: avoid_print
       print(widget.userId);
       final results = await DatabaseConnection().executeQuery(
           'SELECT * FROM get_user_and_card_info(@id);',
@@ -68,10 +67,6 @@ class Home2State extends State<Home> {
     } catch (e, stackTrace) {
       // ignore: avoid_print
       print('Error: $e');
-    } finally {
-      await widget.db.connection?.close();
-      // ignore: avoid_print
-      print('Connection closed for getInfoUser');
     }
   }
 
