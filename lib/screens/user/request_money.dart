@@ -159,20 +159,6 @@ Future<void> check_balance(int id, double mount) async{
 Future<void> sendMoney(double _mount2) async{
       try {
           await DatabaseConnection().connect();
-
-          print('''  SELECT insert_transaction(
-                ${0}, 
-                '${generateRandomhash().toString()}', 
-                ${int.tryParse(_receiverAddressController.text)}, 
-                '${ReceiverName.replaceAll("'", "''")}', 
-                ${widget.userId}, 
-                '${widget.username.replaceAll("'", "''")}', 
-                ${_mount2}, 
-                '${_mess.text.isNotEmpty ? _mess.text.replaceAll("'", "''") : "No message"}', 
-                ${_selectedCategoryId}, 
-                ${dataUser[0]['id']}
-              );''');
-
           final results = await DatabaseConnection().executeQuery('''
               SELECT insert_transaction(
                 ${0}, 

@@ -23,6 +23,7 @@ contract AccountManager {
     }
 
     function getAccount(address user) public view returns (string memory, bool) {
+        require(accounts[user].isRegistered, "Account does not exist");
         return (accounts[user].name, accounts[user].isRegistered);
     }
 

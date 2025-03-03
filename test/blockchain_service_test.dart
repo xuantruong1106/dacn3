@@ -1,71 +1,59 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/connect/blockchain_service.dart'; // Thay đổi đường dẫn nếu cần
-import 'dart:math';
+import 'package:web3dart/web3dart.dart';
+import 'package:dacn3/connect/blockchain_service.dart';
 
 void main() {
-  late BlockchainService blockchainService;
-
-  // Khởi tạo BlockchainService trước mỗi test
-  setUp(() {
+  WidgetsFlutterBinding.ensureInitialized();
+  late BlockchainService blockchainService;  
+  
+  setUp(() async {
     blockchainService = BlockchainService();
-  });
-
-  // Kiểm tra việc khởi tạo BlockchainService
-  test('Khởi tạo BlockchainService', () async {
     await blockchainService.init();
-    expect(blockchainService.clinet, isNotNull);
-    expect(blockchainService.contract, isNotNull);
   });
-
-  // Kiểm tra hàm createAccount
+  
+  test('Kiểm tra tải ABI', () async {
+    String abi = await blockchainService.loadAbi();
+    expect(abi.isNotEmpty, true, reason: 'ABI không được để trống');
+  });
+  
   test('Tạo tài khoản mới', () async {
-    String username = "testuser";
-    List<String> result = await blockchainService.createAccount(username);
-
-    expect(result, isNotEmpty);
-    expect(result.length, 2); // Địa chỉ và private key
-    expect(result[0], isNotEmpty); // Địa chỉ mới tạo
-    expect(result[1], isNotEmpty); // Private key mới tạo
+    List<String> account = await blockchainService.createAccount("TestUser");
+    expect(account.length, 2, reason: 'Phải trả về địa chỉ và private key');
+    expect(account[0].startsWith("0x"), true, reason: 'Địa chỉ phải hợp lệ');
   });
+  
+  test('Lấy thông tin tài khoản', () async {
+  List<String> account = await blockchainService.createAccount("TestUser");
+  Map<String, dynamic> accountInfo = await blockchainService.getAccount(account[0]);
 
-  // Kiểm tra hàm getAccount
-  test('Lấy tài khoản', () async {
-    String address = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Địa chỉ ví test
-    String accountInfo = await blockchainService.getAccount(address);
-
-    expect(accountInfo, isNotEmpty);
+    expect(accountInfo, "TestUser", reason: 'Tên tài khoản phải khớp với giá trị đã tạo');
   });
-
-  // Kiểm tra hàm validateRecipient
-  test('Kiểm tra tính hợp lệ của địa chỉ người nhận', () async {
-    String recipientAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Địa chỉ ví test
-    bool isValid = await blockchainService.validateRecipient(recipientAddress);
-
-    expect(isValid, isTrue); // Giả sử địa chỉ là hợp lệ
+  
+  test('Kiểm tra số dư tài khoản', () async {
+    List<String> account = await blockchainService.createAccount("TestUser");
+    BigInt balance = await blockchainService.getBalance(account[0]);
+    expect(balance, BigInt.zero, reason: 'Tài khoản mới phải có số dư ban đầu là 0');
   });
-
-  // Kiểm tra hàm checkBalance
-  test('Kiểm tra số dư', () async {
-    String senderPrivateKey = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Private key test
-    double amount = 0.1;
-
-    bool hasEnoughBalance = await blockchainService.checkBalance(senderPrivateKey, amount);
-
-    expect(hasEnoughBalance, isTrue); // Giả sử người gửi có đủ số dư
+  
+  test('Kiểm tra số dư trước khi giao dịch', () async {
+    List<String> account = await blockchainService.createAccount("TestUser");
+    bool hasEnough = await blockchainService.checkBalance(account[1], 0.01);
+    expect(hasEnough, false, reason: 'Tài khoản mới không nên có đủ số dư');
   });
-
-  // Kiểm tra hàm transferETH
-  test('Chuyển ETH', () async {
-    String senderPrivateKey = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Private key test
-    String recipientAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Địa chỉ người nhận
-    double amount = 0.1; // Số ETH cần chuyển
-
+  
+  test('Thực hiện giao dịch ETH', () async {
+    List<String> sender = await blockchainService.createAccount("Sender");
+    List<String> recipient = await blockchainService.createAccount("Recipient");
+    
+    // Nạp tiền vào tài khoản sender (testnet hoặc bằng phương pháp mock)
+    // Giả định rằng đã có ETH trong tài khoản sender
     String txHash = await blockchainService.transferETH(
-      senderPrivateKey: senderPrivateKey,
-      recipientAddress: recipientAddress,
-      amount: amount,
+      senderPrivateKey: sender[1],
+      recipientAddress: recipient[0],
+      amount: 0.01,
     );
-
-    expect(txHash, isNotEmpty);
+    
+    expect(txHash.isNotEmpty, true, reason: 'TX Hash không được trống nếu giao dịch thành công');
   });
 }

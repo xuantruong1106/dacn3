@@ -8,8 +8,9 @@ import 'package:http/io_client.dart';
 import 'dart:typed_data';
 
 class BlockchainService {
-  final String rpcUrl = "http://10.0.2.2:8545";
-  final String privateKey = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+  final String rpcUrl = "http://127.0.0.1:8545";
+  final String privateKey =
+      "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
   final String contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
   late Web3Client _client;
@@ -22,6 +23,11 @@ class BlockchainService {
 
   DeployedContract get contract => _contract;
   Web3Client get clinet => _client;
+
+  EthereumAddress getAddressFromPrivateKey(String privateKey) {
+    final credentials = EthPrivateKey.fromHex(privateKey);
+    return credentials.address;
+  }
 
   BlockchainService() {
     final httpClient = HttpClient()
@@ -43,100 +49,16 @@ class BlockchainService {
       _getAccount = _contract.function("getAccount");
       _getBalance = _contract.function("getBalance");
 
-      print("BlockchainService: Đã khởi tạo hợp đồng thành công.");
+      print("BlockchainService: Hợp đồng đã được khởi tạo.");
     } catch (e) {
       print("BlockchainService: Lỗi khi khởi tạo hợp đồng: $e");
     }
   }
 
-Future<String> getAccount(String address) async {
-  try {
-    print('getAccount-address: $address ${EthereumAddress.fromHex(address)}');
-    final result = await _client.call(
-      contract: _contract,
-      function: _getAccount,
-      params: [EthereumAddress.fromHex(address)],
-    );
-    print('error in here');
-
-    // Ensure the result has the expected structure
-    if (result.isEmpty || result.length != 2) {
-      print("getAccount: Unexpected result format");
-      return '';
-    }
-
-    String name = result[0];
-    bool isRegistered = result[1];
-
-    // Debug prints
-    print("Account Name: $name");
-    print("Is Registered: $isRegistered");
-
-    return name;
-  } catch (e) {
-    print('getAccount error: $e');
-    return '';
-  }
-}
-
-
-
-Future<BigInt> getBalance(String address) async {
-  try {
-    final result = await _client.call(
-      contract: _contract,
-      function: _getBalance,
-      params: [EthereumAddress.fromHex(address)],
-    );
-
-    return result[0];  // Assuming getBalance returns a single BigInt value (balance in wei)
-  } catch (e) {
-    print('getBalance: $e');
-    return BigInt.zero;
-  }
-}
-
-  Future<List<String>> createAccount(String username) async {
-    try {
-          final newCredentials = EthPrivateKey.createRandom(Random.secure());
-          final newAddress = newCredentials.address.hex;
-          final privateKeyHex = bytesToHex(newCredentials.privateKey, include0x: false);
-
-          print(privateKeyHex);
-
-          print("Tạo tài khoản mới với địa chỉ e: $newAddress");
-
-          final txHash = await _client.sendTransaction(
-            _credentials, 
-            Transaction.callContract(
-              contract: _contract,
-              function: _createAccount,
-              parameters: [EthereumAddress.fromHex(newAddress), username],
-              maxGas: 100000,
-            ),
-            chainId: 31337,
-          );
-
-          print("Tạo tài khoản blockchain thành công, TX: $txHash");
-
-          String fixPrivateKey(String privateKeyHex) {
-            // Nếu dài hơn 64 ký tự, lấy 64 ký tự cuối cùng
-            return privateKeyHex.length > 64 
-                ? privateKeyHex.substring(privateKeyHex.length - 64) 
-                : privateKeyHex;
-          }
-
-          return [ '$newAddress', '$privateKeyHex'];
-
-    } catch (e) {
-      print("BlockchainService: Lỗi khi tạo tài khoản: $e");
-      return [];
-    }
-  }
-
   Future<String> loadAbi() async {
     try {
-      final abiString = await rootBundle.loadString('assets/AccountManager.json');
+      final abiString =
+          await rootBundle.loadString('assets/AccountManager.json');
       final abiJson = jsonDecode(abiString);
       return jsonEncode(abiJson["abi"]);
     } catch (e) {
@@ -145,37 +67,121 @@ Future<BigInt> getBalance(String address) async {
     }
   }
 
-  Future<bool> validateRecipient(String recipientAddress) async {
-    try {
-      EthereumAddress address = EthereumAddress.fromHex(recipientAddress);
-      EtherAmount balance = await _client.getBalance(address);
-      
-      // Nếu số dư tồn tại, người nhận hợp lệ
-      if (balance.getInWei >= BigInt.zero) {
-        return true;
-      }
-    } catch (e) {
-      print("Lỗi khi kiểm tra địa chỉ người nhận: $e");
+  Future<Map<String, dynamic>> getAccount(String address) async {
+  try {
+    print('🟢 Checking getAccount for address: $address');
+
+    // Kiểm tra địa chỉ hợp lệ
+    if (!RegExp(r'^0x[a-fA-F0-9]{40}$').hasMatch(address)) {
+      print("🔴 Error: Invalid Ethereum address format!");
+      return {};
     }
-    
-    return false; // Địa chỉ không hợp lệ
+
+    final ethAddress = EthereumAddress.fromHex(address);
+    print('🟢 EthereumAddress object created: $ethAddress');
+
+    final result = await _client.call(
+      contract: _contract,
+      function: _getAccount,
+      params: [ethAddress],
+    );
+
+    print('🟢 Raw result from contract: $result');
+
+    if (result.isEmpty || result.length != 2) {
+      print("🔴 getAccount: Unexpected result format");
+      return {};
+    }
+
+    print('🟢 Decoding data...');
+    final dynamic nameData = result[0];
+    final dynamic isRegisteredData = result[1];
+
+    print('🟢 Name Data Type: ${nameData.runtimeType}, Value: $nameData');
+    print('🟢 isRegistered Data Type: ${isRegisteredData.runtimeType}, Value: $isRegisteredData');
+
+    // Chuyển đổi dữ liệu về dạng mong đợi
+    String name = nameData.toString(); // Ép kiểu về String
+    bool isRegistered = isRegisteredData as bool;
+
+    return {'name': name, 'isRegistered': isRegistered};
+  } catch (e) {
+    print('🔴 getAccount error: $e');
+    return {};
+  }
+}
+
+
+  Future<List<String>> createAccount(String username) async {
+
+    try {
+      final newCredentials = EthPrivateKey.createRandom(Random.secure());
+      final newAddress = newCredentials.address.hex;
+      final privateKeyHex =
+          bytesToHex(newCredentials.privateKey, include0x: false);
+
+      print(privateKeyHex);
+
+      print("Tạo tài khoản mới với địa chỉ e: $newAddress");
+
+      final txHash = await _client.sendTransaction(
+        _credentials,
+        Transaction.callContract(
+          contract: _contract,
+          function: _createAccount,
+          parameters: [EthereumAddress.fromHex(newAddress), username],
+          maxGas: 100000,
+        ),
+        chainId: 31337,
+      );
+
+      print("Tạo tài khoản blockchain thành công, TX: $txHash");
+
+      String fixPrivateKey(String privateKeyHex) {
+        // Nếu dài hơn 64 ký tự, lấy 64 ký tự cuối cùng
+        return privateKeyHex.length > 64
+            ? privateKeyHex.substring(privateKeyHex.length - 64)
+            : privateKeyHex;
+      }
+
+      return ['$newAddress', '$privateKeyHex'];
+    } catch (e) {
+      print("BlockchainService: Lỗi khi tạo tài khoản: $e");
+      return [];
+    }
+  }
+
+  Future<BigInt> getBalance(String address) async {
+    try {
+      final result = await _client.call(
+        contract: _contract,
+        function: _getBalance,
+        params: [EthereumAddress.fromHex(address)],
+      );
+
+      return result[
+          0]; // Assuming getBalance returns a single BigInt value (balance in wei)
+    } catch (e) {
+      print('getBalance: $e');
+      return BigInt.zero;
+    }
   }
 
   // 2️⃣ HÀM KIỂM TRA SỐ DƯ
   Future<bool> checkBalance(String senderPrivateKey, double amount) async {
     try {
-      // Tạo Credentials từ private key để lấy địa chỉ ví người gửi
-      Credentials credentials = EthPrivateKey.fromHex(senderPrivateKey);
-      EthereumAddress senderAddress = credentials.address; // Đã sửa lỗi extractAddress()
+      EthereumAddress senderAddress =
+          getAddressFromPrivateKey(senderPrivateKey);
 
-      // Lấy số dư của người gửi
       EtherAmount balance = await _client.getBalance(senderAddress);
+      EtherAmount gasPrice = await _client.getGasPrice();
 
-      // Chuyển đổi số ETH sang Wei
-      BigInt weiAmount = BigInt.from(amount * 1e18);
+      // Tính toán tổng số tiền cần thiết (số ETH muốn gửi + phí giao dịch)
+      BigInt weiAmount = BigInt.from(amount * pow(10, 18));
+      BigInt totalCost = weiAmount + (gasPrice.getInWei * BigInt.from(21000));
 
-      if (balance.getInWei < weiAmount) {
-        print("Lỗi: Số dư không đủ để thực hiện giao dịch");
+      if (balance.getInWei < totalCost) {
+        print("Lỗi: Số dư không đủ để thực hiện giao dịch.");
         return false;
       }
 
@@ -186,95 +192,46 @@ Future<BigInt> getBalance(String address) async {
     }
   }
 
-  // Future<String> transferETH({
-  //   required String senderPrivateKey,
-  //   required String recipientAddress,
-  //   required double amount, // Số ETH cần chuyển
-  // }) async {
-  //   try {
-  //     // 3️⃣ Chuyển đổi ETH sang Wei
-  //     BigInt weiAmount = BigInt.from(amount * 1e12);
-
-  //     // 4️⃣ Load tài khoản từ private key
-  //     Credentials credentials = EthPrivateKey.fromHex(senderPrivateKey);
-  //     EthereumAddress senderAddress = credentials.address;
-
-  //     // // 5️⃣ Tạo giao dịch
-  //     // Transaction tx = Transaction.callContract(
-  //     //   contract: _contract,
-  //     //   function: _transfer,
-  //     //   parameters: [EthereumAddress.fromHex(recipientAddress), weiAmount],
-  //     //   maxGas: 100000,
-  //     // );
-
-  //     String tx = await _client.sendTransaction(
-  //       credentials,
-  //       Transaction(
-  //         to: EthereumAddress.fromHex(recipientAddress),
-  //         from: senderAddress,
-  //         value: EtherAmount.fromBigInt (EtherUnit.ether, weiAmount),
-  //         maxGas: 100000,
-  //       ),
-  //       chainId: 31337,  // Testnet chain id
-  //     );
-
-  //     // 6️⃣ Ký và gửi giao dịch
-  //     String txHash = await _client.sendTransaction(credentials, tx as Transaction, chainId: 31337); 
-
-  //     print("Giao dịch thành công! TX Hash: $txHash");
-  //     return txHash;
-  //   } catch (e) {
-  //     print("Lỗi khi gửi giao dịch: $e");
-  //     return "Giao dịch thất bại";
-  //   }
-  // }
   Future<String> transferETH({
-  required String senderPrivateKey,
-  required String recipientAddress,
-  required double amount, // Số ETH cần chuyển
-}) async {
-  try {
-    // Chuyển đổi ETH sang Wei
-    BigInt weiAmount = BigInt.from(amount * 1e18); // Ensure conversion is correct (1 ETH = 1e18 Wei)
+    required String senderPrivateKey,
+    required String recipientAddress,
+    required double amount,
+  }) async {
+    try {
+      Credentials credentials = EthPrivateKey.fromHex(senderPrivateKey);
+      EthereumAddress senderAddress = credentials.address;
 
-    // Load tài khoản từ private key
-    Credentials credentials = EthPrivateKey.fromHex(senderPrivateKey);
-    EthereumAddress senderAddress = credentials.address;
+      BigInt weiAmount = BigInt.from(amount * pow(10, 18));
 
-    // Kiểm tra số dư của người gửi
-    EtherAmount senderBalance = await _client.getBalance(senderAddress);
-    if (senderBalance.getInWei < weiAmount + BigInt.from(21000 * 100)) {
-      // 21000 gas là gas cơ bản cho một giao dịch chuyển ETH, điều chỉnh nếu cần
-      print("Số dư không đủ để thực hiện giao dịch (bao gồm phí gas).");
-      return "Số dư không đủ để thực hiện giao dịch.";
-    }
+      bool hasEnoughBalance = await checkBalance(senderPrivateKey, amount);
+      if (!hasEnoughBalance) {
+        return "Số dư không đủ để thực hiện giao dịch.";
+      }
 
-    // Estimating gas for the transaction
-    var gasEstimate = await _client.estimateGas(
-      sender: senderAddress,
-      to: EthereumAddress.fromHex(recipientAddress),
-      value: EtherAmount.fromBigInt(EtherUnit.ether, weiAmount),
-    );
-
-    // Tạo giao dịch
-    String txHash = await _client.sendTransaction(
-      credentials,
-      Transaction(
+      EtherAmount gasPrice = await _client.getGasPrice();
+      var gasEstimate = await _client.estimateGas(
+        sender: senderAddress,
         to: EthereumAddress.fromHex(recipientAddress),
-        from: senderAddress,
-        value: EtherAmount.fromBigInt(EtherUnit.ether, weiAmount),
-        gasPrice: EtherAmount.inWei(BigInt.from(28711)), // gas price (điều chỉnh theo nhu cầu)
-        maxGas: gasEstimate.toInt(),
-      ),
-      chainId: 31337,  // Testnet chain id
-    );
+        value: EtherAmount.fromBigInt(EtherUnit.wei, weiAmount),
+      );
 
-    print("Giao dịch thành công! TX Hash: $txHash");
-    return txHash;
-  } catch (e) {
-    print("Lỗi khi gửi giao dịch: $e");
-    return "Giao dịch thất bại";
+      String txHash = await _client.sendTransaction(
+        credentials,
+        Transaction(
+          to: EthereumAddress.fromHex(recipientAddress),
+          from: senderAddress,
+          value: EtherAmount.fromBigInt(EtherUnit.wei, weiAmount),
+          gasPrice: gasPrice,
+          maxGas: gasEstimate.toInt(),
+        ),
+        chainId: 31337,
+      );
+
+      print("Giao dịch thành công! TX Hash: $txHash");
+      return txHash;
+    } catch (e) {
+      print("Lỗi khi gửi giao dịch: $e");
+      return "Giao dịch thất bại";
+    }
   }
-}
-
 }

@@ -297,7 +297,7 @@ class Home2State extends State<Home> {
             // Action Buttons
             Padding(
               padding:
-                  const EdgeInsets.only(top: 20.0, left: 80.0, right: 80.0),
+                  const EdgeInsets.only(top: 25.0, left: 50.0, right: 40.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -331,7 +331,7 @@ class Home2State extends State<Home> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 10.0, left: 20.0),
+              padding: const EdgeInsets.only(top: 15.0, left: 20.0),
               child: Row(
                 children: [
                   Text(

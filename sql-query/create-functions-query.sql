@@ -340,6 +340,42 @@ SELECT * from create_account_and_card3(
 
 
 
+CREATE OR REPLACE FUNCTION get_transactions_in_current_month(user_id INT)
+RETURNS TABLE (
+    transaction_id INT,
+    transaction_type INT,
+    category_name TEXT,
+    card_balance NUMERIC
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        t.id AS transaction_id,
+        t.type_transaction AS transaction_type,
+        c.name_category AS category_name,
+        ca.total_amount AS card_balance
+    FROM transactions t
+    LEFT JOIN categories c ON t.category_id = c.id
+    LEFT JOIN cards ca ON t.card_id = ca.id
+    WHERE t.sender_id = user_id
+    AND DATE_TRUNC('month', t.timestamps) = DATE_TRUNC('month', CURRENT_DATE);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_all_categories()
+RETURNS TABLE (
+    category_id INT,
+    category_name TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id AS category_id, name_category AS category_name FROM categories;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
 
 
 
