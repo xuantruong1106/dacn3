@@ -1,451 +1,629 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:dacn3/connect/database_connect.dart';
 import 'package:dacn3/random_cvv_card_numbrer/utils.dart';
 
 class RequestMoneyScreen extends StatefulWidget {
-   final int userId;
-   final String username;
-  RequestMoneyScreen({super.key, required this.userId,  required this.username });
-  // final db = DatabaseConnection();
+  final int userId;
+  final String username;
+  const RequestMoneyScreen({
+    super.key,
+    required this.userId,
+    required this.username,
+  });
+
   @override
   State<RequestMoneyScreen> createState() => _RequestMoneyScreenState();
 }
 
-
-class _RequestMoneyScreenState extends State<RequestMoneyScreen> {
-
+class _RequestMoneyScreenState extends State<RequestMoneyScreen>
+    with SingleTickerProviderStateMixin {
   final _receiverAddressController = TextEditingController();
-  final _mount = TextEditingController();
-  final _mess = TextEditingController(); 
+  final _amountController = TextEditingController();
+  final _messageController = TextEditingController();
 
   late List<Map<String, dynamic>> dataUser;
-  late String ReceiverName = '';
-  late List<Map<String, dynamic>> _category;
+  late String receiverName = '';
+  late List<Map<String, dynamic>> _categories;
   String? _selectedCategory;
   int? _selectedCategoryId;
-  String? error = '';
-  
+  String? _error;
+  bool _isLoading = false;
+  bool _isProcessing = false;
+
+  // Animation controllers
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
     dataUser = [];
-    _category = [];
-    getCardInfo();
-    getCategory();
+    _categories = [];
+
+    // Initialize animations
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    _loadInitialData();
   }
- @override
+
+  Future<void> _loadInitialData() async {
+    setState(() => _isLoading = true);
+    try {
+      await Future.wait([
+        getCardInfo(),
+        getCategories(),
+      ]);
+    } finally {
+      setState(() => _isLoading = false);
+      _animationController.forward();
+    }
+  }
+
+  @override
   void dispose() {
     _receiverAddressController.dispose();
-    _mount.dispose();
+    _amountController.dispose();
+    _messageController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
-
-Future<void> getCategory() async {
+  Future<void> getCategories() async {
     try {
+      final result = await DatabaseConnection().executeQuery(
+        'SELECT id, name_category FROM categories WHERE type_category = 0',
+      );
 
-      final result = await DatabaseConnection().executeQuery(''' 
-        SELECT id, name_category 
-        FROM categories
-        where type_category = 0''');
-      
-      print('getCategory: $result');
-
-        setState(() {
-          _category = result.map<Map<String, dynamic>>((e) => {
-            'id': e[0], // ID của category
-            'name': e[1].toString(), // Tên của category
-          }).toList();
-        });
-
-       print('getCategory: $_category');
-
-      // await DatabaseConnection().close();
-    } catch (e){
-      print('getCategory-error: $e');
+      setState(() {
+        _categories = result
+            .map<Map<String, dynamic>>((e) => {
+                  'id': e[0],
+                  'name': e[1].toString(),
+                })
+            .toList();
+      });
+    } catch (e) {
+      _showErrorSnackBar('Failed to load categories');
     }
-}
+  }
 
-Future<void> getCardInfo() async{
-   try {
-      print('getCardInfo: ${widget.userId}');
+  Future<void> getCardInfo() async {
+    try {
       await DatabaseConnection().connect();
       final results = await DatabaseConnection().executeQuery(
         'SELECT * FROM get_cards_by_account(@id);',
-      substitutionValues: {
-            'id': widget.userId,
-      });
+        substitutionValues: {'id': widget.userId},
+      );
 
-      if(results.isEmpty){
-        print('result empty');
-        return;
+      if (results.isNotEmpty) {
+        setState(() {
+          dataUser = results
+              .map((row) => {
+                    'id': row[0],
+                    'card_number': row[1],
+                    'private_key': row[2],
+                    'total_amount': row[3],
+                  })
+              .toList();
+        });
       }
-
-      setState(() { 
-        dataUser = results.map((row) => {
-          'id': row[0],
-          'card_number': row[1],
-          'private_key': row[2],
-          'total_amount': row[3],
-        }).toList();
-      });
-  } catch(e)
-  {
-    print('getCardInfo-error: $e');
+    } catch (e) {
+      _showErrorSnackBar('Failed to load card information');
+    }
   }
-}
 
-Future<void> getReceiverAddress(int receiverAddress) async {
+  Future<void> getReceiverAddress(int receiverAddress) async {
     try {
+      setState(() => _isProcessing = true);
       await DatabaseConnection().connect();
       final results = await DatabaseConnection().executeQuery(
         'SELECT * FROM get_receviername(@address);',
-        substitutionValues: {
-          'address': receiverAddress,
-    });
+        substitutionValues: {'address': receiverAddress},
+      );
 
-     if(results.isEmpty){
-       print('result empty');
-     }
-     print(results[0][0]);
-    setState(() {
-      ReceiverName = results.isNotEmpty ? results[0][0] as String: '';
-    });
-  } catch (e) {
-    print('getReceiverAddress-error: $e');
+      setState(() {
+        receiverName = results.isNotEmpty ? results[0][0] as String : '';
+      });
+    } catch (e) {
+      _showErrorSnackBar('Failed to find receiver');
+    } finally {
+      setState(() => _isProcessing = false);
+    }
   }
-}
 
-Future<void> check_balance(int id, double mount) async{
-  try {
-      await DatabaseConnection().connect();
+  Future<void> checkBalance(double amount) async {
+    try {
+      setState(() => _isProcessing = true);
       final results = await DatabaseConnection().executeQuery(
-        'SELECT * FROM check_balance(@id, @mount);',
+        'SELECT * FROM check_balance(@id, @amount);',
         substitutionValues: {
           'id': widget.userId,
-          'mount': mount
-    });
+          'amount': amount,
+        },
+      );
 
-     if (results.isNotEmpty && results[0][0] == false) {
-    // Hiển thị cảnh báo số dư không đủ
+      if (results.isNotEmpty && results[0][0] == false) {
+        _showInsufficientFundsDialog();
+      } else {
+        await sendMoney(amount);
+      }
+    } catch (e) {
+      _showErrorSnackBar('Failed to check balance');
+    } finally {
+      setState(() => _isProcessing = false);
+    }
+  }
+
+  void _showInsufficientFundsDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Cảnh báo'),
-          content: const Text('Số dư không đủ để thực hiện giao dịch.'),
+          title: Text(
+            'Insufficient Funds',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'You don\'t have enough balance to complete this transaction.',
+            style: GoogleFonts.inter(),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'OK',
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF4B5B98),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         );
       },
     );
-  } else {
-    // Thực hành giao dịch
-    print('check_balance: $mount');
-    sendMoney(mount);
   }
-  } catch (e) {
-    print('getReceiverAddress-error: $e');
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: const EdgeInsets.all(10),
+      ),
+    );
   }
-}
 
-Future<void> sendMoney(double _mount2) async{
-      try {
-          await DatabaseConnection().connect();
+  Future<void> sendMoney(double amount) async {
+    try {
+      await DatabaseConnection().connect();
 
-          print('''  SELECT insert_transaction(
-                ${0}, 
-                '${generateRandomhash().toString()}', 
-                ${int.tryParse(_receiverAddressController.text)}, 
-                '${ReceiverName.replaceAll("'", "''")}', 
-                ${widget.userId}, 
-                '${widget.username.replaceAll("'", "''")}', 
-                ${_mount2}, 
-                '${_mess.text.isNotEmpty ? _mess.text.replaceAll("'", "''") : "No message"}', 
-                ${_selectedCategoryId}, 
-                ${dataUser[0]['id']}
-              );''');
+      // Sửa lỗi: Thay thế ReceiverName bằng receiverName và _mess bằng _messageController
+      final sanitizedReceiverName = receiverName.replaceAll("'", "''");
+      final sanitizedMessage = _messageController.text.isNotEmpty
+          ? _messageController.text.replaceAll("'", "''")
+          : "No message";
 
-          final results = await DatabaseConnection().executeQuery('''
-              SELECT insert_transaction(
-                ${0}, 
-                '${generateRandomhash().toString()}', 
-                ${int.tryParse(_receiverAddressController.text)}, 
-                '${ReceiverName.replaceAll("'", "''")}', 
-                ${widget.userId}, 
-                '${widget.username.replaceAll("'", "''")}', 
-                ${_mount2}, 
-                '${_mess.text.isNotEmpty ? _mess.text.replaceAll("'", "''") : "No message"}', 
-                ${_selectedCategoryId}, 
-                ${dataUser[0]['id']}
-              );
-          ''');
+      final int? receiverAddressInt =
+          int.tryParse(_receiverAddressController.text);
 
-          if(results.isNotEmpty){
-             Navigator.pushReplacementNamed(context, '/main',  arguments: widget.userId);
-          }
+      if (receiverAddressInt == null ||
+          _selectedCategoryId == null ||
+          dataUser.isEmpty) {
+        _showErrorSnackBar('Missing required information for transaction');
+        return;
+      }
+
+      // Sử dụng SQL parameters thay vì truyền giá trị trực tiếp vào query
+      final results = await DatabaseConnection().executeQuery(
+        'SELECT insert_transaction(@1, @2, @3, @4, @5, @6, @7, @8, @9, @10);',
+        substitutionValues: {
+          '1': 0,
+          '2': generateRandomhash().toString(),
+          '3': receiverAddressInt,
+          '4': sanitizedReceiverName,
+          '5': widget.userId,
+          '6': widget.username.replaceAll("'", "''"),
+          '7': amount,
+          '8': sanitizedMessage,
+          '9': _selectedCategoryId,
+          '10': dataUser[0]['id'],
+        },
+      );
+
+      if (results.isNotEmpty) {
+        Navigator.pushReplacementNamed(context, '/main',
+            arguments: widget.userId);
+      }
     } catch (e) {
       print('sendMoney-error: $e');
+      _showErrorSnackBar('Transaction failed: ${e.toString()}');
     }
-}
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          color: const Color(0xFF4B5B98),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Send Money',
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Center(
-                    child: const Text(
-                      'Request Money',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+        child: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFF4B5B98),
+                ),
+              )
+            : FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Form Fields
+                          _buildFormSection(),
+
+                          const SizedBox(height: 32),
+
+                          // Amount Input
+                          _buildAmountSection(),
+
+                          const SizedBox(height: 32),
+
+                          // Error Message
+                          if (_error != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Text(
+                                _error!,
+                                style: GoogleFonts.inter(
+                                  color: Colors.redAccent,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+
+                          // Send Button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 60,
+                            child: ElevatedButton(
+                              onPressed: _isProcessing
+                                  ? null
+                                  : () {
+                                      double? amount = double.tryParse(
+                                          _amountController.text);
+                                      if (amount != null) {
+                                        setState(() => _error = null);
+                                        checkBalance(amount);
+                                      } else {
+                                        setState(() {
+                                          _error =
+                                              'Please enter a valid amount';
+                                        });
+                                      }
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF4B5B98),
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: Colors.grey[300],
+                                elevation: 8,
+                                shadowColor:
+                                    const Color(0xFF4B5B98).withOpacity(0.4),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: _isProcessing
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 3,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Send Money',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+                        ],
                       ),
                     ),
-                  )
-                ],
-              ),
-              const SizedBox(height: 32),
-
-              // Form Fields
-                const Text(
-                  'Receiver Address',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 16,
-                  ),
-                ),
-              TextField(
-                controller: _receiverAddressController,
-                decoration: InputDecoration(
-                  hintText: '1228',
-                  prefixIcon:
-                      Icon(Icons.person_outline, color: Colors.grey[400]),
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                ),
-                 keyboardType: TextInputType.number, // Giới hạn nhập số
-                  onSubmitted: (_receiverAddressController) {
-                    getReceiverAddress(int.tryParse(_receiverAddressController) ?? 0); // Gọi hàm khi nhấn Enter
-                  },
-              ),
-              const SizedBox(height: 24),
-
-              const Text(
-                'Receiver Name',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: '$ReceiverName',
-                  prefixIcon: Icon(Icons.person_outline, color: Colors.grey[400]),
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey[300]!),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+      ),
+    );
+  }
 
-              const Text(
-                'Content',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
+  Widget _buildFormSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildInputField(
+            label: 'Receiver Address',
+            controller: _receiverAddressController,
+            icon: Icons.person_outline_rounded,
+            keyboardType: TextInputType.number,
+            onSubmitted: (value) {
+              if (value.isNotEmpty) {
+                getReceiverAddress(int.tryParse(value) ?? 0);
+              }
+            },
+          ),
+          const SizedBox(height: 24),
+          _buildInputField(
+            label: 'Receiver Name',
+            initialValue: receiverName,
+            icon: Icons.badge_rounded,
+            enabled: false,
+          ),
+          const SizedBox(height: 24),
+          _buildInputField(
+            label: 'Message',
+            controller: _messageController,
+            icon: Icons.message_rounded,
+            hintText: 'Add a message (optional)',
+          ),
+          const SizedBox(height: 24),
+          _buildCategoryDropdown(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    TextEditingController? controller,
+    String? initialValue,
+    IconData? icon,
+    String? hintText,
+    TextInputType? keyboardType,
+    bool enabled = true,
+    Function(String)? onSubmitted,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          initialValue: initialValue,
+          enabled: enabled,
+          keyboardType: keyboardType,
+          onFieldSubmitted: onSubmitted,
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            prefixIcon: Icon(icon, color: const Color(0xFF4B5B98)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF4B5B98)),
+            ),
+            filled: true,
+            fillColor: enabled ? Colors.white : Colors.grey[100],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Category',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: _selectedCategory,
+          decoration: InputDecoration(
+            prefixIcon:
+                const Icon(Icons.category_rounded, color: Color(0xFF4B5B98)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF4B5B98)),
+            ),
+            filled: true,
+            fillColor: Colors.white,
+          ),
+          items: _categories.map((category) {
+            return DropdownMenuItem<String>(
+              value: category['name'],
+              child: Text(
+                category['name'],
+                style: GoogleFonts.inter(),
               ),
-              TextField(
-                controller: _mess,
-                decoration: InputDecoration(
-                  hintText: 'Tanya Myroniuk',
-                  prefixIcon:
-                      Icon(Icons.title, color: Colors.grey[400]),
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedCategory = newValue;
+              _selectedCategoryId = _categories.firstWhere(
+                (element) => element['name'] == newValue,
+                orElse: () => {'id': null, 'name': ''},
+              )['id'];
+            });
+          },
+        ),
+      ],
+    );
+  }
 
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Category',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedCategory,
-                    decoration: InputDecoration(
-                      border: UnderlineInputBorder( borderSide: BorderSide(color: Colors.white),),
-                      prefixIcon: Icon(Icons.title, color: Colors.grey[400]),
-                    ),
-                    dropdownColor: Colors.white,
-                    items: _category.map((category) {
-                      return DropdownMenuItem<String>(
-                        value: category['name'],
-                        child: Text(category['name']),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedCategory = newValue;
-                        _selectedCategoryId = _category.firstWhere(
-                          (element) => element['name'] == newValue)['id'];
-                      });
-                      print('Selected ID: $_selectedCategoryId');
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
-
-        
-
-              // Amount Input
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Enter Your Amount',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                          },
-                          child: const Text(
-                            'Change Currency?',
-                            style: TextStyle(
-                              color: Colors.pink,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        const Text(
-                          'USD',
-                          style: TextStyle(
-                            fontSize: 40,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextField(
-                            controller: _mount,
-                            keyboardType:
-                                TextInputType.numberWithOptions(decimal: true),
-                            style: const TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            decoration: const InputDecoration(
-                              hintText: '0.00',
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const Spacer(),
-
+  Widget _buildAmountSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Text(
-                (error ?? '').isNotEmpty ? error! : ' ',
-                style: TextStyle(color: Colors.red, fontSize: 14),
+                'Amount',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
-
-              const Spacer(),
-
-              // Send Money Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                      double? amount = double.tryParse(_mount.text);
-                      if (amount != null) {
-                        setState(() {
-                          error = ' ';
-                        });
-                        check_balance(widget.userId, amount);
-                      } else {
-                        setState(() {
-                          error = 'Please enter a valid amount.';
-                        });
-                      } 
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'Send Money',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              TextButton.icon(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.currency_exchange_rounded,
+                  size: 18,
+                ),
+                label: const Text('Change'),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF4B5B98),
                 ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _amountController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: GoogleFonts.inter(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            decoration: InputDecoration(
+              hintText: '0.00',
+              hintStyle: GoogleFonts.inter(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[300],
+              ),
+              prefixText: 'USD ',
+              prefixStyle: GoogleFonts.inter(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[400],
+              ),
+              border: InputBorder.none,
+            ),
+          ),
+        ],
       ),
     );
   }
