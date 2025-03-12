@@ -288,6 +288,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION check_passwd_current(
+    user_id INT,
+    input_password TEXT
+) 
+RETURNS BOOLEAN AS $$
+DECLARE
+    stored_passwd TEXT;
+BEGIN
+    -- Lấy mật khẩu đã lưu của user dựa trên user_id
+    SELECT passwd INTO stored_passwd
+    FROM accounts 
+    WHERE id = user_id;
+
+    -- Nếu không tìm thấy user, trả về FALSE
+    IF stored_passwd IS NULL THEN
+        RETURN FALSE;
+    END IF;
+
+    -- So sánh mật khẩu đã nhập với mật khẩu đã băm trong DB
+    RETURN stored_passwd = crypt(input_password, stored_passwd);
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- create_account_and_card
 CREATE OR REPLACE FUNCTION create_account_and_card3(
     p_username TEXT,
@@ -329,10 +353,10 @@ EXCEPTION
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT * from create_account_and_card3(
+SELECT * from create_account_and_card(
     'Ngyen2',  
     '12345',              
-    '111111111111',  
+    '0356593937',  
     '1234',
 	'1111111111',
 	'Da nang'
@@ -374,8 +398,79 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- Edited function
 
+CREATE OR REPLACE FUNCTION get_transactions_in_current_month(user_id INT)
+RETURNS TABLE (
+    transaction_id INT,
+    transaction_type INT,
+    category_name TEXT,
+    card_balance NUMERIC
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        t.id AS transaction_id,
+        t.type_transaction AS transaction_type,
+        c.name_category AS category_name,
+        ca.total_amount AS card_balance
+    FROM transactions t
+    LEFT JOIN categories c ON t.category_id = c.id
+    LEFT JOIN cards ca ON t.card_id = ca.id
+    WHERE t.sender_id = user_id
+    AND DATE_TRUNC('month', t.timestamp) = DATE_TRUNC('month', CURRENT_DATE);
+END;
+$$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION get_all_categories()
+RETURNS TABLE (
+    category_id INT,
+    category_name TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT id AS category_id, name_category AS category_name FROM categories;
+END;
+$$ LANGUAGE plpgsql;
+
+select * from get_transactions_in_current_month(1232)
+
+CREATE OR REPLACE FUNCTION get_transaction_details(
+  transaction_id INT,
+  user_id INT
+)
+RETURNS TABLE (
+  id INT,
+  type_transaction INT,
+  transaction_amount NUMERIC,
+  sender_name VARCHAR,
+  account_recevier VARCHAR,
+  name_receiver VARCHAR,
+  category_name VARCHAR,
+  icon TEXT,
+  description TEXT,
+  transaction_date TIMESTAMP,
+  status VARCHAR,
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    t.id,
+    t.type_transaction,
+	t.amount,
+	t.sender_name,
+	t.account_receiver,
+    t.name_receiver,
+    c.name_category::VARCHAR,
+    c.icon,
+    t.messages,
+    t.timestamp::TIMESTAMP,
+    'Completed'::VARCHAR as status
+  FROM transactions t
+  JOIN categories c ON t.category_id = c.id
+  WHERE t.id = transaction_id
+END;
+$$ LANGUAGE plpgsql;
 
 
 

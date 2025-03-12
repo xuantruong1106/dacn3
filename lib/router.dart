@@ -1,3 +1,5 @@
+import 'package:dacn3/screens/account_info/change_password.dart';
+import 'package:dacn3/screens/account_info/edit_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:dacn3/screens/user/my_card.dart';
 import 'package:dacn3/screens/user/sign_in.dart';
@@ -23,18 +25,34 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => MyCardsScreen(userId: userId));
       case '/sent':
         final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(builder: (_) => RequestMoneyScreen( userId: args['userId'] as int,
-                                                                      username: args['username'] as String,));
+        return MaterialPageRoute(
+            builder: (_) => RequestMoneyScreen(
+                  userId: args['userId'] as int,
+                  username: args['username'] as String,
+                ));
       case '/loan':
         final int userId = settings.arguments as int;
-        return MaterialPageRoute(builder: (_) => SendMoneyScreen(userId: userId));
-      case 'moneylimit':
+        return MaterialPageRoute(
+            builder: (_) => SendMoneyScreen(userId: userId));
+      case '/moneylimit':
         final int userId = settings.arguments as int;
-        return MaterialPageRoute(builder: (_) => SendMoneyScreen(userId: userId));
+        return MaterialPageRoute(
+            builder: (_) => SendMoneyScreen(userId: userId));
       case '/requestmoney':
-       final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(builder: (_) => RequestMoneyScreen( userId: args['userId'] as int,
-                                                                      username: args['username'] as String,));
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+            builder: (_) => RequestMoneyScreen(
+                  userId: args['userId'] as int,
+                  username: args['username'] as String,
+                ));
+      case '/changepassword':
+        final int userId = settings.arguments as int;
+        return MaterialPageRoute(
+            builder: (_) => ChangePasswordScreen(userId: userId));
+      case '/editprofile':
+        final int userId = settings.arguments as int;
+        return MaterialPageRoute(
+            builder: (_) => EditProfileScreen(userId: userId));
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
@@ -53,7 +71,6 @@ class CheckLoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future.microtask(() => Navigator.pushReplacementNamed(context, '/welcome'));
-    
 
     return Scaffold(
       body: Center(child: CircularProgressIndicator()),

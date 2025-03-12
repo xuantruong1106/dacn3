@@ -1,4 +1,5 @@
 
+import 'package:dacn3/welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:dacn3/screens/user/sign_in.dart';
 import 'package:dacn3/router.dart';
@@ -14,7 +15,7 @@ void main(List<String> arguments) async {
         scaffoldBackgroundColor: Colors.white,
       ),
       home: SafeArea(
-        child: SignInScreen(),
+        child: OnboardingScreen(),
       ),
       initialRoute: '/',
       onGenerateRoute: AppRouter.generateRoute,
