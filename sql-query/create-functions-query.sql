@@ -473,6 +473,33 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+<<<<<<< Updated upstream
+CREATE OR REPLACE FUNCTION update_user_info(
+    p_id INT,
+    p_username TEXT DEFAULT NULL,
+    p_phone TEXT DEFAULT NULL,
+    p_address TEXT DEFAULT NULL
+) RETURNS BOOLEAN AS $$
+=======
+<<<<<<< HEAD
+CREATE OR REPLACE FUNCTION get_receivername(p_account_id INT)
+RETURNS TABLE(username TEXT, card_number TEXT) AS $$
+>>>>>>> Stashed changes
+BEGIN
+    UPDATE accounts
+    SET username = COALESCE(p_username, username),
+        phone = COALESCE(p_phone, phone),
+        address = COALESCE(p_address, address)
+    WHERE id = p_id;
+
+    RETURN FOUND;
+END;
+$$ LANGUAGE plpgsql;
+
+<<<<<<< Updated upstream
+=======
+
+=======
 CREATE OR REPLACE FUNCTION update_user_info(
     p_id INT,
     p_username TEXT DEFAULT NULL,
@@ -489,4 +516,6 @@ BEGIN
     RETURN FOUND;
 END;
 $$ LANGUAGE plpgsql;
+>>>>>>> origin/main
 
+>>>>>>> Stashed changes
