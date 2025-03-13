@@ -321,7 +321,7 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
                             final transaction = dataTransaction[index];
                             final isExpense =
-                                transaction['type_transaction'] == 1;
+                                transaction['type_transaction'] == 0;
 
                             return Container(
                               margin: const EdgeInsets.symmetric(
