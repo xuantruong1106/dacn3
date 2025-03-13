@@ -7,7 +7,6 @@ import 'package:dacn3/screens/user/my_card.dart';
 import 'package:dacn3/screens/user/sign_in.dart';
 import 'package:dacn3/screens/user/sign_up.dart';
 import 'package:dacn3/screens/user/user.dart';
-import 'package:dacn3/screens/user/send_money.dart';
 import 'package:dacn3/screens/user/request_money.dart';
 
 class AppRouter {
@@ -40,10 +39,10 @@ class AppRouter {
         return MaterialPageRoute(
             builder: (_) =>
                 SavingsAccountsScreen(userId: args['userId'] as int));
-      case '/moneylimit':
-        final int userId = settings.arguments as int;
-        return MaterialPageRoute(
-            builder: (_) => SendMoneyScreen(userId: userId));
+      // case '/moneylimit':
+      //   final int userId = settings.arguments as int;
+      //   return MaterialPageRoute(
+      //       builder: (_) => SendMoneyScreen(userId: userId));
       case '/requestmoney':
         final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(

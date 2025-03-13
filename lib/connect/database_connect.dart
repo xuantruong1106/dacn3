@@ -9,7 +9,7 @@ class DatabaseConnection with WidgetsBindingObserver {
   final int _port = 5434;
   final String _databaseName = 'dacn3_2';
   final String _username = 'postgres';
-  final String _password = '12345';
+  final String _password = 'andubadao123';
 
   // Private constructor
   DatabaseConnection._internal() {
