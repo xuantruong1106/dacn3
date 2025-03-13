@@ -75,12 +75,19 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
         substitutionValues: {'id': widget.userId},
       );
 
-      if (results.isNotEmpty) {
+      print('User ID: ${widget.userId}');
+      print('Raw Results: $results');
+
+      if (results.isNotEmpty && results[0][0] != null) {
         setState(() {
-          _currentBalance = results[0][0];
+          _currentBalance = double.tryParse(results[0][0].toString()) ?? 0.0;
         });
+      } else {
+        print('No balance found for user ID: ${widget.userId}');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Error loading user balance: $e');
+      print('Stack trace: $stackTrace');
       _showErrorSnackBar('Failed to load user balance');
     }
   }
@@ -210,7 +217,7 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
-                          'Danh sách tài khoản tiết kiệm',
+                          'Savings Accounts List',
                           style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -339,8 +346,8 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
                                                 ),
                                                 child: Text(
                                                   isActive
-                                                      ? 'Đang hoạt động'
-                                                      : 'Đã đáo hạn',
+                                                      ? 'Active'
+                                                      : 'Expired',
                                                   style: GoogleFonts.inter(
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.w600,
@@ -363,7 +370,7 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
                                                         .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    'Số tiền gốc:',
+                                                    'Principal amount:',
                                                     style: GoogleFonts.inter(
                                                       fontSize: 14,
                                                       color: Colors.grey[700],
@@ -388,7 +395,7 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
                                                         .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    'Ngày gửi:',
+                                                    'Date sent:',
                                                     style: GoogleFonts.inter(
                                                       fontSize: 14,
                                                       color: Colors.grey[700],
@@ -523,7 +530,7 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
               ),
               const SizedBox(width: 12),
               Text(
-                'Số dư khả dụng',
+                'Available balance',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -543,7 +550,7 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Có thể sử dụng để gửi tiết kiệm',
+            'Can be used for savings',
             style: GoogleFonts.inter(
               fontSize: 14,
               color: Colors.white.withOpacity(0.7),

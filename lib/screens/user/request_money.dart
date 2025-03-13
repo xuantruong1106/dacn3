@@ -140,7 +140,7 @@ class _RequestMoneyScreenState extends State<RequestMoneyScreen>
       setState(() => _isProcessing = true);
       await DatabaseConnection().connect();
       final results = await DatabaseConnection().executeQuery(
-        'SELECT * FROM get_receviername(@address);',
+        'SELECT * FROM get_receivername(@address);',
         substitutionValues: {'address': receiverAddress},
       );
 
@@ -283,7 +283,8 @@ class _RequestMoneyScreenState extends State<RequestMoneyScreen>
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           color: const Color(0xFF4B5B98),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushReplacementNamed(context, '/main',
+              arguments: widget.userId),
         ),
         title: Text(
           'Send Money',
