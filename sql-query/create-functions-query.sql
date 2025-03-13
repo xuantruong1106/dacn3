@@ -473,4 +473,20 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION update_user_info(
+    p_id INT,
+    p_username TEXT DEFAULT NULL,
+    p_phone TEXT DEFAULT NULL,
+    p_address TEXT DEFAULT NULL
+) RETURNS BOOLEAN AS $$
+BEGIN
+    UPDATE accounts
+    SET username = COALESCE(p_username, username),
+        phone = COALESCE(p_phone, phone),
+        address = COALESCE(p_address, address)
+    WHERE id = p_id;
+
+    RETURN FOUND;
+END;
+$$ LANGUAGE plpgsql;
 

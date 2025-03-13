@@ -8,10 +8,7 @@ import 'package:dacn3/screens/user/savings_deposit.dart';
 class SavingsAccountsScreen extends StatefulWidget {
   final int userId;
 
-  const SavingsAccountsScreen({
-    Key? key,
-    required this.userId,
-  }) : super(key: key);
+  const SavingsAccountsScreen({super.key, required this.userId});
 
   @override
   State<SavingsAccountsScreen> createState() => _SavingsAccountsScreenState();
@@ -74,7 +71,7 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
     try {
       await DatabaseConnection().connect();
       final results = await DatabaseConnection().executeQuery(
-        'SELECT balance FROM accounts WHERE id = @id',
+        'SELECT total_amount FROM cards WHERE id_account = @id',
         substitutionValues: {'id': widget.userId},
       );
 
@@ -159,10 +156,11 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           color: const Color(0xFF4B5B98),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushReplacementNamed(context, '/main',
+              arguments: widget.userId),
         ),
         title: Text(
-          'Tài khoản tiết kiệm',
+          'Saving Accounts',
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -236,7 +234,7 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      'Bạn chưa có tài khoản tiết kiệm nào',
+                                      'Don"t you have any account',
                                       style: GoogleFonts.inter(
                                         fontSize: 16,
                                         color: Colors.grey[600],
@@ -270,7 +268,7 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
                                         ),
                                       ),
                                       child: Text(
-                                        'Tạo tài khoản tiết kiệm',
+                                        'Create a new saving account',
                                         style: GoogleFonts.inter(
                                           fontWeight: FontWeight.w600,
                                         ),

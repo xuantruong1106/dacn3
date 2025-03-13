@@ -15,13 +15,15 @@ class _EditProfileScreenState extends State<EditProfileScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  String? _errorMessage;
+  bool _showSuccessMessage = false;
   late List<Map<String, dynamic>> dataUser;
 
   // Text controllers
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _pinController = TextEditingController();
+  final db = DatabaseConnection();
 
   // Animation controllers
   late AnimationController _animationController;
@@ -66,42 +68,101 @@ class _EditProfileScreenState extends State<EditProfileScreen>
     _nameController.dispose();
     _addressController.dispose();
     _phoneController.dispose();
-    _pinController.dispose();
     _animationController.dispose();
     super.dispose();
   }
 
+  void _showNotification(String message, bool isError) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isError
+                  ? Icons.error_outline_rounded
+                  : Icons.check_circle_outline_rounded,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isError ? Colors.redAccent : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: const EdgeInsets.all(10),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _saveProfile() async {
+    setState(() {
+      _errorMessage = null;
+      _showSuccessMessage = false;
+    });
+
     if (_formKey.currentState!.validate()) {
+      if (_nameController.text.trim().isEmpty &&
+          _addressController.text.trim().isEmpty &&
+          _phoneController.text.trim().isEmpty) {
+        setState(() {
+          _errorMessage = 'Please fill in at least one field';
+          _animationController.reset();
+          _animationController.forward();
+        });
+        _showNotification(_errorMessage!, true);
+        return;
+      }
+
       setState(() {
         _isLoading = true;
       });
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        await db.connect();
 
-      if (mounted) {
+        // Tạo map chứa chỉ các giá trị có dữ liệu
+        final Map<String, dynamic> values = {'id': widget.userId};
+
+        if (_nameController.text.trim().isNotEmpty) {
+          values['name'] = _nameController.text.trim();
+        }
+        if (_addressController.text.trim().isNotEmpty) {
+          values['address'] = _addressController.text.trim();
+        }
+        if (_phoneController.text.trim().isNotEmpty) {
+          values['phone'] = _phoneController.text.trim();
+        }
+
+        await db.executeQuery(
+          'SELECT update_user_info(@id, @name, @phone, @address );',
+          substitutionValues: values,
+        );
+
+        _showNotification('Profile updated successfully', false);
+      } catch (e) {
+        _showNotification('Failed to update profile', true);
+      } finally {
         setState(() {
           _isLoading = false;
         });
-
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Profile updated successfully',
-              style: GoogleFonts.inter(),
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: const EdgeInsets.all(10),
-          ),
-        );
-
-        Navigator.pop(context);
       }
     }
   }
@@ -143,23 +204,15 @@ class _EditProfileScreenState extends State<EditProfileScreen>
                     'total_amount': row[6],
                   })
               .toList();
+
+          _nameController.text = dataUser[0]['username'];
+          _addressController.text = dataUser[0]['address'];
+          _phoneController.text = dataUser[0]['phone'];
         });
       }
     } catch (e) {
-      _showErrorSnackBar('Failed to load user data');
+      _showNotification('Failed to load user data', true);
     }
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.redAccent,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(10),
-      ),
-    );
   }
 
   @override
@@ -272,26 +325,6 @@ class _EditProfileScreenState extends State<EditProfileScreen>
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your phone number';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 24),
-                            _buildInputField(
-                              label: 'PIN',
-                              controller: _pinController,
-                              icon: Icons.lock_rounded,
-                              keyboardType: TextInputType.number,
-                              obscureText: true,
-                              maxLength: 6,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              validator: (value) {
-                                if (value != null &&
-                                    value.isNotEmpty &&
-                                    value.length < 4) {
-                                  return 'PIN must be at least 4 digits';
                                 }
                                 return null;
                               },

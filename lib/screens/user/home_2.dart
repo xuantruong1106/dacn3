@@ -407,7 +407,9 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget _buildCard() {
     return Container(
-      height: 200,
+      // Remove fixed height to allow dynamic sizing
+      constraints: const BoxConstraints(
+          minHeight: 180), // Minimum height instead of fixed
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF4B5B98), Color(0xFF341969)],
@@ -434,8 +436,9 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
           // Card Content
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20), // Reduced padding
             child: Column(
+              mainAxisSize: MainAxisSize.min, // Allow column to shrink
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -444,22 +447,22 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     const Icon(
                       Icons.credit_card,
                       color: Colors.white,
-                      size: 32,
+                      size: 28, // Slightly smaller icon
                     ),
                     SvgPicture.asset(
                       "assets/mastercard.svg",
-                      width: 60,
-                      height: 40,
+                      width: 50, // Slightly smaller logo
+                      height: 35,
                     ),
                   ],
                 ),
-                const Spacer(),
+                const SizedBox(height: 16),
                 Text(
                   dataUser.isNotEmpty
                       ? '\$${dataUser[0]['total_amount']}'
                       : '\$0.00',
                   style: GoogleFonts.inter(
-                    fontSize: 28,
+                    fontSize: 24, // Slightly smaller font
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -470,12 +473,12 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       ? "${widget.userId}"
                       : '•••• •••• •••• ••••',
                   style: GoogleFonts.inter(
-                    fontSize: 16,
+                    fontSize: 14, // Smaller font size
                     color: Colors.white70,
                     letterSpacing: 2,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12), // Reduced spacing
                 Row(
                   children: [
                     Column(
@@ -484,7 +487,7 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         Text(
                           'Expires',
                           style: GoogleFonts.inter(
-                            fontSize: 12,
+                            fontSize: 11, // Smaller font
                             color: Colors.white60,
                           ),
                         ),
@@ -493,28 +496,28 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               ? dataUser[0]['expiration_date']
                               : 'MM/YY',
                           style: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 13, // Smaller font
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(width: 40),
+                    const SizedBox(width: 30), // Reduced spacing
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'CVV',
                           style: GoogleFonts.inter(
-                            fontSize: 12,
+                            fontSize: 11, // Smaller font
                             color: Colors.white60,
                           ),
                         ),
                         Text(
                           dataUser.isNotEmpty ? '•••' : '•••',
                           style: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 13, // Smaller font
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                           ),
@@ -558,7 +561,6 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
             '/loan',
             arguments: {
               'userId': widget.userId,
-              'username': dataUser[0]['username'],
             },
           );
         },

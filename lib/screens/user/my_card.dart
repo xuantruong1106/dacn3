@@ -214,7 +214,8 @@ class _MyCardsScreenState extends State<MyCardsScreen>
 
   Widget _buildCard() {
     return Container(
-      height: 200,
+      // Remove fixed height to allow dynamic sizing
+      constraints: const BoxConstraints(minHeight: 180),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF4B5B98), Color(0xFF341969)],
@@ -241,8 +242,9 @@ class _MyCardsScreenState extends State<MyCardsScreen>
 
           // Card Content
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20), // Reduced padding
             child: Column(
+              mainAxisSize: MainAxisSize.min, // Allow column to shrink
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -251,22 +253,22 @@ class _MyCardsScreenState extends State<MyCardsScreen>
                     const Icon(
                       Icons.credit_card,
                       color: Colors.white,
-                      size: 32,
+                      size: 28, // Smaller icon
                     ),
                     const Icon(
                       Icons.contactless_rounded,
                       color: Colors.white,
-                      size: 28,
+                      size: 24, // Smaller icon
                     ),
                   ],
                 ),
-                const Spacer(),
+                const SizedBox(height: 16),
                 Text(
                   dataUser.isNotEmpty
                       ? '\$${dataUser[0]['total_amount']}'
                       : '\$0.00',
                   style: GoogleFonts.inter(
-                    fontSize: 28,
+                    fontSize: 24, // Smaller font
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -277,12 +279,12 @@ class _MyCardsScreenState extends State<MyCardsScreen>
                       ? "${widget.userId}"
                       : '•••• •••• •••• ••••',
                   style: GoogleFonts.inter(
-                    fontSize: 16,
+                    fontSize: 14, // Smaller font
                     color: Colors.white70,
                     letterSpacing: 2,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12), // Reduced spacing
                 Row(
                   children: [
                     Column(
@@ -291,7 +293,7 @@ class _MyCardsScreenState extends State<MyCardsScreen>
                         Text(
                           'Expires',
                           style: GoogleFonts.inter(
-                            fontSize: 12,
+                            fontSize: 11, // Smaller font
                             color: Colors.white60,
                           ),
                         ),
@@ -300,28 +302,28 @@ class _MyCardsScreenState extends State<MyCardsScreen>
                               ? dataUser[0]['expiration_date']
                               : 'MM/YY',
                           style: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 13, // Smaller font
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(width: 40),
+                    const SizedBox(width: 30), // Reduced spacing
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'CVV',
                           style: GoogleFonts.inter(
-                            fontSize: 12,
+                            fontSize: 11, // Smaller font
                             color: Colors.white60,
                           ),
                         ),
                         Text(
                           dataUser.isNotEmpty ? dataUser[0]['cvv'] : '•••',
                           style: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 13, // Smaller font
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                           ),
@@ -331,12 +333,12 @@ class _MyCardsScreenState extends State<MyCardsScreen>
                     const Spacer(),
                     SvgPicture.asset(
                       "assets/mastercard.svg",
-                      width: 60,
-                      height: 40,
+                      width: 50, // Smaller logo
+                      height: 35,
                       placeholderBuilder: (context) => const Icon(
                         Icons.error,
                         color: Colors.red,
-                        size: 30,
+                        size: 24, // Smaller error icon
                       ),
                     ),
                   ],
