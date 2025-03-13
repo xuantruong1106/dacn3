@@ -147,18 +147,19 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
         amount = double.parse(_amountController.text.replaceAll(',', ''));
       } catch (e) {
         setState(() {
-          _errorMessage = 'Số tiền không hợp lệ';
+          _errorMessage = 'Invalid amount';
         });
-        _showNotification('Số tiền không hợp lệ', true);
+        _showNotification('Invalid amount', true);
         return;
       }
 
       // Check if amount is greater than current balance
       if (amount > widget.currentBalance) {
         setState(() {
-          _errorMessage = 'Số dư không đủ để thực hiện giao dịch này';
+          _errorMessage = 'Insufficient balance to complete this transaction';
         });
-        _showNotification('Số dư không đủ để thực hiện giao dịch này', true);
+        _showNotification(
+            'Insufficient balance to complete this transaction', true);
         return;
       }
 
@@ -177,7 +178,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
           (user_id, amount, interest_rate, term_months, start_date, end_date, description, status)
           VALUES 
           (@user_id, @amount, @interest_rate, @term_months, CURRENT_TIMESTAMP, 
-           CURRENT_TIMESTAMP + INTERVAL '@term_months months', @description, 'active')
+           CURRENT_TIMESTAMP + (@term_months || ' months')::interval, @description, 'active')
           RETURNING id
           ''',
           substitutionValues: {
@@ -191,6 +192,30 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
 
         final savingsId = savingsResult[0][0];
 
+        final card_id = DatabaseConnection().executeQuery(
+          '''
+          SELECT id FROM cards WHERE id_account = @user_id
+          ''',
+          substitutionValues: {
+            'user_id': widget.userId,
+          },
+        );
+
+        print(card_id);
+
+        final categoryResult = await DatabaseConnection().executeQuery(
+          'SELECT id FROM categories WHERE name_category = @category_name LIMIT 1',
+          substitutionValues: {
+            'category_name': 'Savings',
+          },
+        );
+
+        // Extract the category ID
+        int? categoryId;
+        if (categoryResult.isNotEmpty) {
+          categoryId = categoryResult[0][0];
+        }
+
         // 2. Create a transaction record for the deposit
         await DatabaseConnection().executeQuery(
           '''
@@ -200,15 +225,15 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
           VALUES 
           (1, @transaction_hash, @sender_id, 'Savings Deposit', @amount, 
            @messages, CURRENT_TIMESTAMP, 
-           (SELECT id FROM categories WHERE category_name = 'Savings' LIMIT 1), 
-           (SELECT card_id FROM accounts WHERE id = @user_id LIMIT 1))
+            @category_id)
           ''',
           substitutionValues: {
             'transaction_hash': 'SAV${DateTime.now().millisecondsSinceEpoch}',
             'sender_id': widget.userId.toString(),
             'amount': amount,
             'messages':
-                'Tiền gửi tiết kiệm: ${_selectedTermMonths} tháng với lãi suất ${_interestRate}%',
+                'Savings deposit: ${_selectedTermMonths} month with interest ${_interestRate}%',
+            'category_id': categoryId,
             'user_id': widget.userId,
           },
         );
@@ -216,9 +241,9 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
         // 3. Update user's balance
         await DatabaseConnection().executeQuery(
           '''
-          UPDATE accounts 
-          SET balance = balance - @amount
-          WHERE id = @user_id
+          UPDATE card 
+          SET total_amount = total_amount - @amount
+          WHERE id_account = @user_id
           ''',
           substitutionValues: {
             'amount': amount,
@@ -240,13 +265,14 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
           _animationController.forward();
         });
 
-        _showNotification("Gửi tiền tiết kiệm thành công!", false);
+        _showNotification("Deposit successful!", false);
       } catch (e) {
         setState(() {
-          _errorMessage = "Lỗi cơ sở dữ liệu: $e";
+          _errorMessage = "Database error: $e";
           _isLoading = false;
         });
-        _showNotification("Lỗi cơ sở dữ liệu: $e", true);
+        print("Database error: $e");
+        _showNotification("Database error: $e", true);
       }
     }
   }
@@ -293,7 +319,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Gửi tiền tiết kiệm',
+          'Deposit savings',
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -337,7 +363,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                       // Description
                       Center(
                         child: Text(
-                          'Gửi tiền tiết kiệm để tăng trưởng tài sản của bạn',
+                          'Save money to grow your wealth',
                           style: GoogleFonts.inter(
                             fontSize: 14,
                             color: Colors.grey[600],
@@ -387,7 +413,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Thành công!',
+                                        'Success!',
                                         style: GoogleFonts.inter(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -396,7 +422,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Tiền gửi tiết kiệm của bạn đã được tạo thành công.',
+                                        'Your savings deposit has been successfully created.',
                                         style: GoogleFonts.inter(
                                           fontSize: 14,
                                           color: Colors.green[700],
@@ -511,7 +537,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
 
                             // Amount Field
                             Text(
-                              'Số tiền gửi',
+                              'Deposit amount',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -525,19 +551,19 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                               onChanged: (_) => setState(() {}),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Vui lòng nhập số tiền';
+                                  return 'Please enter amount';
                                 }
                                 try {
                                   final amount =
                                       double.parse(value.replaceAll(',', ''));
                                   if (amount <= 0) {
-                                    return 'Số tiền phải lớn hơn 0';
+                                    return 'Amount must be greater than 0';
                                   }
                                   if (amount > widget.currentBalance) {
-                                    return 'Số dư không đủ';
+                                    return 'Insufficient balance';
                                   }
                                 } catch (e) {
-                                  return 'Số tiền không hợp lệ';
+                                  return 'Invalid amount';
                                 }
                                 return null;
                               },
@@ -577,7 +603,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Số dư hiện tại: ${_formatCurrency(widget.currentBalance)}',
+                              'Current balance: ${_formatCurrency(widget.currentBalance)}',
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: Colors.grey[600],
@@ -587,7 +613,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
 
                             // Term Selection
                             Text(
-                              'Kỳ hạn',
+                              'Term',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -604,7 +630,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                                     _selectedTermMonths == months;
                                 return ChoiceChip(
                                   label: Text(
-                                    '$months tháng',
+                                    '$months month',
                                     style: GoogleFonts.inter(
                                       fontWeight: isSelected
                                           ? FontWeight.w600
@@ -650,7 +676,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Lãi suất:',
+                                    'Interest rate:',
                                     style: GoogleFonts.inter(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -673,7 +699,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
 
                             // Description Field
                             Text(
-                              'Mô tả (tùy chọn)',
+                              'Description (optional)',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -710,7 +736,8 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                                 ),
                                 filled: true,
                                 fillColor: Colors.white,
-                                hintText: 'Nhập mô tả cho khoản tiết kiệm này',
+                                hintText:
+                                    'Enter a description for this savings',
                               ),
                             ),
                           ],
@@ -741,7 +768,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Tóm tắt khoản tiết kiệm',
+                                'Savings Summary',
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -750,34 +777,34 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                               ),
                               const SizedBox(height: 16),
                               _buildSummaryRow(
-                                'Số tiền gốc:',
+                                'Principal amount:',
                                 _formatCurrency(double.tryParse(
                                         _amountController.text
                                             .replaceAll(',', '')) ??
                                     0),
                               ),
                               _buildSummaryRow(
-                                'Lãi suất:',
-                                '${_interestRate.toStringAsFixed(1)}% / năm',
+                                'Interest rate:',
+                                '${_interestRate.toStringAsFixed(1)}% / year',
                               ),
                               _buildSummaryRow(
-                                'Kỳ hạn:',
-                                '$_selectedTermMonths tháng',
+                                'Term:',
+                                '$_selectedTermMonths month',
                               ),
                               _buildSummaryRow(
-                                'Tiền lãi dự kiến:',
+                                'Expected profit:',
                                 _formatCurrency(interestEarned),
                                 isHighlighted: true,
                               ),
                               _buildSummaryRow(
-                                'Tổng tiền nhận được:',
+                                'Total amount received:',
                                 _formatCurrency(maturityAmount),
                                 isHighlighted: true,
                                 isBold: true,
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Ngày đáo hạn: ${DateFormat('dd/MM/yyyy').format(DateTime.now().add(Duration(days: _selectedTermMonths * 30)))}',
+                                'Due date: ${DateFormat('dd/MM/yyyy').format(DateTime.now().add(Duration(days: _selectedTermMonths * 30)))}',
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontStyle: FontStyle.italic,
@@ -817,7 +844,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
                                   ),
                                 )
                               : Text(
-                                  'Gửi tiền tiết kiệm',
+                                  'Deposit savings',
                                   style: GoogleFonts.inter(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,

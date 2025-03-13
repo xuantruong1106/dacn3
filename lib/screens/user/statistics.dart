@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:dacn3/connect/database_connect.dart';
+import 'package:intl/intl.dart';
 
 class StatisticsScreen extends StatefulWidget {
   final int userId;
@@ -19,6 +20,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   String highestCategory = "";
   double highestPercentage = 0.0;
   bool _isLoading = true;
+  int _selectedMonth = DateTime.now().month;
+  int _selectedYear = DateTime.now().year;
 
   // Animation controllers
   late AnimationController _animationController;
@@ -67,6 +70,10 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  String _getMonthName(int month) {
+    return DateFormat('MMMM').format(DateTime(0, month));
   }
 
   Future<void> fetchTransactionData() async {
@@ -236,7 +243,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         child: Column(
           children: [
             Text(
-              'Current Balance',
+              'Statistics for ${_getMonthName(_selectedMonth)} $_selectedYear',
               style: GoogleFonts.inter(
                 fontSize: 16,
                 color: Colors.white70,

@@ -36,9 +36,10 @@ class AppRouter {
                   username: args['username'] as String,
                 ));
       case '/loan':
-        final int userId = (settings.arguments as Map<String, int>)['id'] ?? 0;
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-            builder: (_) => SavingsAccountsScreen(userId: userId));
+            builder: (_) =>
+                SavingsAccountsScreen(userId: args['userId'] as int));
       case '/moneylimit':
         final int userId = settings.arguments as int;
         return MaterialPageRoute(

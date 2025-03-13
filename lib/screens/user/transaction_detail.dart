@@ -194,8 +194,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isExpense
-              ? [Colors.green.shade400, Colors.green.shade700]
-              : [Colors.red.shade400, Colors.red.shade700],
+              ? [Colors.red.shade400, Colors.red.shade700]
+              : [Colors.green.shade400, Colors.green.shade700],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
