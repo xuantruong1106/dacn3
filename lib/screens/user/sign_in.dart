@@ -1,11 +1,11 @@
-// ignore_for_file: use_build_context_synchronously, deprecated_member_use
-
+import 'package:dacn3/screens/user/forgot_pass.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dacn3/connect/database_connect.dart';
 import 'package:dacn3/connect/blockchain_service.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:dacn3/screens/user/forgot_pass.dart';
 
 
 class SignInScreen extends StatefulWidget {
@@ -212,7 +212,7 @@ class _SignInScreenState extends State<SignInScreen>
     final password = _passwordController.text;
 
     if (phone.isEmpty || password.isEmpty) {
-      _showError('Số điện thoại và mật khẩu không được để trống');
+      _showError('Phone number and password cannot be blank');
       return;
     }
 
@@ -230,7 +230,7 @@ class _SignInScreenState extends State<SignInScreen>
 
         Navigator.pushReplacementNamed(context, '/main', arguments: _userId);
       } else {
-        _showError('Số điện thoại hoặc mật khẩu không đúng');
+        _showError('Incorrect phone number or password');
       }
     } finally {
       if (mounted) {
@@ -385,7 +385,13 @@ class _SignInScreenState extends State<SignInScreen>
                         alignment: Alignment.centerRight,
                         child: GestureDetector(
                           onTap: () {
-                            // Handle forgot password
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
+                              ),
+                            );
                           },
                           child: const Text(
                             'Forgot Password?',
@@ -526,7 +532,7 @@ class _SignInScreenState extends State<SignInScreen>
       child: ElevatedButton(
         onPressed: _isLoading ? null : _signIn,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFF4B5B98),
+          backgroundColor: const Color(0xFF4B5B98),
           foregroundColor: Colors.white,
           disabledBackgroundColor: Colors.grey.shade300,
           elevation: 8,

@@ -498,16 +498,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+<<<<<<< HEAD
 CREATE OR REPLACE FUNCTION update_user_info(
     p_id INT,
     p_username TEXT DEFAULT NULL,
     p_phone TEXT DEFAULT NULL,
     p_address TEXT DEFAULT NULL
 ) RETURNS BOOLEAN AS $$
+=======
+
+>>>>>>> bceb70c2e025256d30c2fb93a8a4224322d05897
 
 CREATE OR REPLACE FUNCTION get_receivername(p_account_id INT)
 RETURNS TABLE(username TEXT, card_number TEXT) AS $$
->>>>>>> Stashed changes
 BEGIN
     UPDATE accounts
     SET username = COALESCE(p_username, username),
@@ -535,6 +538,7 @@ BEGIN
     RETURN FOUND;
 END;
 $$ LANGUAGE plpgsql;
+<<<<<<< HEAD
 
 
 CREATE OR REPLACE FUNCTION get_cards_by_account(p_id_account INTEGER)
@@ -573,3 +577,50 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+=======
+-- Create savings_accounts table if it doesn't exist
+CREATE TABLE IF NOT EXISTS savings_accounts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES accounts(id),
+  amount NUMERIC(10,2) NOT NULL,
+  interest_rate NUMERIC(5,2) NOT NULL,
+  term_months INTEGER NOT NULL,
+  start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  end_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  description TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index for faster queries
+CREATE INDEX IF NOT EXISTS idx_savings_accounts_user_id ON savings_accounts(user_id);
+
+CREATE OR REPLACE FUNCTION reset_password(p_phone TEXT, p_new_password TEXT) 
+RETURNS BOOLEAN AS $$
+DECLARE
+    hashed_password TEXT;
+    user_exists BOOLEAN;
+BEGIN
+    -- Kiểm tra xem số điện thoại có tồn tại không
+    SELECT EXISTS (SELECT 1 FROM accounts WHERE phone = p_phone) INTO user_exists;
+
+    IF NOT user_exists THEN
+        RETURN FALSE; -- Số điện thoại không tồn tại
+    END IF;
+
+    -- Mã hóa mật khẩu mới
+    hashed_password := crypt(p_new_password, gen_salt('bf'));
+
+    -- Cập nhật mật khẩu mới vào tài khoản
+    UPDATE accounts 
+    SET passwd = hashed_password, time_updated = NOW() 
+    WHERE phone = p_phone;
+
+    RETURN TRUE; -- Đặt lại mật khẩu thành công
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE NOTICE 'Unexpected error: %', SQLERRM;
+        RETURN FALSE;
+END;
+$$ LANGUAGE plpgsql;
+>>>>>>> bceb70c2e025256d30c2fb93a8a4224322d05897

@@ -110,23 +110,17 @@ Future<void> getReceiverAddress(int receiverAddress) async {
       await DatabaseConnection().connect();
       final results = await DatabaseConnection().executeQuery(
         'SELECT * FROM get_receivername(@address);',
-        substitutionValues: {
-          'address': receiverAddress,
-    });
+        substitutionValues: {'address': receiverAddress},
+      );
 
-     if(results.isEmpty){
-      
-       print('result empty');
-     }
-     
-     print(results[0][0]);
-    setState(() {
-      receiverName = results.isNotEmpty ? results[0][0] as String: '';
-      recipientAddress = results.isNotEmpty ? results[0][1] as String: '';
-    });
-  } catch (e) {
-    
-    print('getReceiverAddress-error: $e');
+      setState(() {
+        receiverName = results.isNotEmpty ? results[0][0] as String : '';
+      });
+    } catch (e) {
+      _showErrorSnackBar('Failed to find receiver');
+    } finally {
+      setState(() => _isProcessing = false);
+    }
   }
 }
 
@@ -202,7 +196,25 @@ Future<void> sendMoney(double _mount2) async{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          color: const Color(0xFF4B5B98),
+          onPressed: () => Navigator.pushReplacementNamed(context, '/main',
+              arguments: widget.userId),
+        ),
+        title: Text(
+          'Send Money',
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
