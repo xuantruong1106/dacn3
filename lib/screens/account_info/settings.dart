@@ -337,7 +337,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Handle logout
+                    Navigator.pushReplacementNamed(context, '/sign_in');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red[50],

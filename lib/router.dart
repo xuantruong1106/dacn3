@@ -1,5 +1,6 @@
 import 'package:dacn3/screens/account_info/change_password.dart';
 import 'package:dacn3/screens/account_info/edit_profile.dart';
+import 'package:dacn3/screens/user/savings_account.dart';
 import 'package:flutter/material.dart';
 import 'package:dacn3/screens/user/my_card.dart';
 import 'package:dacn3/screens/user/sign_in.dart';
@@ -31,9 +32,9 @@ class AppRouter {
                   username: args['username'] as String,
                 ));
       case '/loan':
-        final int userId = settings.arguments as int;
+        final int userId = (settings.arguments as Map<String, int>)['id'] ?? 0;
         return MaterialPageRoute(
-            builder: (_) => SendMoneyScreen(userId: userId));
+            builder: (_) => SavingsAccountsScreen(userId: userId));
       case '/moneylimit':
         final int userId = settings.arguments as int;
         return MaterialPageRoute(

@@ -6,7 +6,7 @@ class DatabaseConnection with WidgetsBindingObserver {
   PostgreSQLConnection? _connection;
 
   final String _host = 'localhost'; // Dùng 'localhost' khi chạy trên Windows app
-  final int _port = 5433;
+  final int _port = 5434;
   final String _databaseName = 'dacn3';
   final String _username = 'postgres';
   final String _password = 'andubadao123';
