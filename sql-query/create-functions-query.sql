@@ -473,4 +473,17 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION get_receivername(p_account_id INT)
+RETURNS TABLE(username TEXT, card_number TEXT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT a.username, c.card_number
+    FROM accounts a
+    JOIN cards c ON a.id = c.id_account
+    WHERE a.id = p_account_id
+    LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;
+
+
 

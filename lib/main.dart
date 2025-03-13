@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:dacn3/screens/user/sign_in.dart';
 import 'package:dacn3/router.dart';
 import 'package:dacn3/connect/database_connect.dart';
+import 'package:dacn3/connect/blockchain_service.dart';
 
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseConnection().connect();
+  await BlockchainService().init();
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,

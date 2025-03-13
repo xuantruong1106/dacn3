@@ -1,237 +1,352 @@
+// // ignore_for_file: avoid_print
+
+// import 'dart:convert';
+// import 'package:flutter/services.dart';
+// import 'package:web3dart/web3dart.dart';
+// import 'package:http/http.dart' as http;
+
+// class BlockchainService {
+//   static const String rpcUrl = "http://10.0.2.2:8545";
+//   static const String privateKey =
+//       "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+//   static const String contractAddress = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
+
+//   late Web3Client _client;
+//   late DeployedContract _contract;
+//   late EthPrivateKey _credentials;
+
+//   late ContractFunction _createAccount;
+//   late ContractFunction _deposit;
+//   late ContractFunction _transfer;
+//   late ContractFunction _getBalance;
+
+//   // Singleton pattern
+//   static final BlockchainService _instance = BlockchainService._internal();
+//   factory BlockchainService() => _instance;
+//   BlockchainService._internal() {
+//     _client = Web3Client(rpcUrl, http.Client());
+//     _credentials = EthPrivateKey.fromHex(privateKey);
+//   }
+
+//   Future<void> init() async {
+//     try {
+//       String abi = await _loadAbi();
+//       _contract = DeployedContract(
+//         ContractAbi.fromJson(abi, "AccountManager"),
+//         EthereumAddress.fromHex(contractAddress),
+//       );
+//       _createAccount = _contract.function("createAccount");
+//       _deposit = _contract.function("deposit");
+//       _transfer = _contract.function("transfer");
+//       _getBalance = _contract.function("getBalance");
+
+//       print("BlockchainService: Contract initialized at $contractAddress");
+//     } catch (e) {
+//       print("BlockchainService: Error initializing contract: $e");
+//       rethrow;
+//     }
+//   }
+
+//   Future<String> _loadAbi() async {
+//     try {
+//       final abiString =
+//           await rootBundle.loadString('assets/AccountManager.json');
+//       final abiJson = jsonDecode(abiString);
+//       return jsonEncode(abiJson["abi"]);
+//     } catch (e) {
+//       print("BlockchainService: Error loading ABI: $e");
+//       rethrow;
+//     }
+//   }
+
+//   Future<String> createAccount(String username) async {
+//     try {
+//       final txHash = await _client.sendTransaction(
+//         _credentials,
+//         Transaction.callContract(
+//           contract: _contract,
+//           function: _createAccount,
+//           parameters: [username],
+//           maxGas: 100000,
+//         ),
+//         chainId: 31337,
+//       );
+//       print("Account created successfully, TX: $txHash");
+//       return txHash;
+//     } catch (e) {
+//       print("BlockchainService: Error creating account: $e");
+//       return "";
+//     }
+//   }
+
+//   Future<String> deposit(double amountInEth) async {
+//     try {
+//       final weiAmount = BigInt.from(amountInEth * 1000000000000000000);
+
+//       final txHash = await _client.sendTransaction(
+//         _credentials,
+//         Transaction.callContract(
+//           contract: _contract,
+//           function: _deposit,
+//           value: EtherAmount.fromBigInt(EtherUnit.wei, weiAmount),
+//           maxGas: 100000, parameters: [],
+//         ),
+//         chainId: 31337,
+//       );
+//       print("Deposit successful, TX: $txHash");
+//       return txHash;
+//     } catch (e) {
+//       print("BlockchainService: Error depositing: $e");
+//       return "";
+//     }
+//   }
+
+//   Future<String> transfer(String recipientAddress, BigInt amountInEth) async {
+//     try {
+//       print('BlockchainService transfer $recipientAddress, $amountInEth');
+//       final txHash = await _client.sendTransaction(
+//         _credentials,
+//         Transaction.callContract(
+//           contract: _contract,
+//           function: _transfer,
+//           parameters: [
+//             EthereumAddress.fromHex(recipientAddress),
+//             amountInEth,
+//           ],
+//           value: EtherAmount.fromBigInt(EtherUnit.wei, amountInEth), // Gửi ETH qua value
+//           maxGas: 100000,
+//         ),
+//         chainId: 31337,
+//       );
+//       print("Transfer successful, TX: $txHash");
+//       return txHash;
+//     } catch (e) {
+//       print("BlockchainService: Error transferring: $e");
+//       return "";
+//     }
+//   }
+
+//   Future<BigInt> checkBalance() async {
+//     try {
+//       final result = await _client.call(
+//         contract: _contract,
+//         function: _getBalance,
+//         params: [],
+//       );
+//       print("Balance retrieved: ${result[0]} wei");
+//       return result[0] as BigInt;
+//     } catch (e) {
+//       print("BlockchainService: Error getting balance: $e");
+//       return BigInt.zero;
+//     }
+//   }
+
+//   Future<Map<String, dynamic>> checkBeforeTransfer(String recipientAddress, double amountInEth) async {
+//     try {
+//       final weiAmount = BigInt.from(amountInEth * 1000000000000000000); // 1 ETH = 10^18 wei
+//       final currentBalance = await checkBalance();
+
+//       // Không kiểm tra số dư vì transfer() dùng msg.value, không trừ balance
+//       print("BlockchainService: Balance before transfer: $currentBalance wei");
+
+//       final txHash = await transfer(recipientAddress, weiAmount);
+//       if (txHash == "") {
+//         print("BlockchainService: Transfer failed");
+//         return {'isSufficient': false, 'weiAmount': weiAmount};
+//       }
+
+//       final currentBalanceAfter = await checkBalance();
+//       print('BlockchainService-checkBeforeTransfer-checkBalance: $currentBalanceAfter');
+//       print('BlockchainService-checkBeforeTransfer: transfer done');
+
+//       return {'isSufficient': true, 'weiAmount': weiAmount};
+//     } catch (e) {
+//       print("BlockchainService: Error checking balance before transfer: $e");
+//       return {'isSufficient': false, 'weiAmount': BigInt.zero};
+//     }
+//   }
+// }
+
+
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
 import 'package:flutter/services.dart';
-import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
-import 'package:http/io_client.dart';
-import 'dart:typed_data';
+import 'package:http/http.dart' as http;
 
 class BlockchainService {
-  final String rpcUrl = "http://127.0.0.1:8545";
-  final String privateKey =
+  static const String rpcUrl = "http://10.0.2.2:8545";
+  static const String privateKey =
       "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-  final String contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+  static const String contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
   late Web3Client _client;
   late DeployedContract _contract;
-  late ContractFunction _createAccount;
-  late ContractFunction _transfer;
   late EthPrivateKey _credentials;
-  late ContractFunction _getAccount;
+
+  late ContractFunction _createAccount;
+  late ContractFunction _deposit;
+  late ContractFunction _transfer;
   late ContractFunction _getBalance;
 
-  DeployedContract get contract => _contract;
-  Web3Client get clinet => _client;
-
-  EthereumAddress getAddressFromPrivateKey(String privateKey) {
-    final credentials = EthPrivateKey.fromHex(privateKey);
-    return credentials.address;
-  }
-
-  BlockchainService() {
-    final httpClient = HttpClient()
-      ..connectionTimeout = Duration(seconds: 60)
-      ..idleTimeout = Duration(seconds: 60);
-    _client = Web3Client(rpcUrl, IOClient(httpClient));
+  // Singleton pattern
+  static final BlockchainService _instance = BlockchainService._internal();
+  factory BlockchainService() => _instance;
+  BlockchainService._internal() {
+    _client = Web3Client(rpcUrl, http.Client());
     _credentials = EthPrivateKey.fromHex(privateKey);
   }
 
   Future<void> init() async {
     try {
-      String abi = await loadAbi();
+      String abi = await _loadAbi();
       _contract = DeployedContract(
         ContractAbi.fromJson(abi, "AccountManager"),
         EthereumAddress.fromHex(contractAddress),
       );
       _createAccount = _contract.function("createAccount");
+      _deposit = _contract.function("deposit");
       _transfer = _contract.function("transfer");
-      _getAccount = _contract.function("getAccount");
       _getBalance = _contract.function("getBalance");
 
-      print("BlockchainService: Hợp đồng đã được khởi tạo.");
+      print("BlockchainService: Contract initialized at $contractAddress");
     } catch (e) {
-      print("BlockchainService: Lỗi khi khởi tạo hợp đồng: $e");
+      print("BlockchainService: Error initializing contract: $e");
+      rethrow;
     }
   }
 
-  Future<String> loadAbi() async {
+  Future<String> _loadAbi() async {
     try {
       final abiString =
           await rootBundle.loadString('assets/AccountManager.json');
       final abiJson = jsonDecode(abiString);
       return jsonEncode(abiJson["abi"]);
     } catch (e) {
-      print("BlockchainService: Lỗi khi tải ABI: $e");
-      return "";
+      print("BlockchainService: Error loading ABI: $e");
+      rethrow;
     }
   }
 
-  Future<Map<String, dynamic>> getAccount(String address) async {
-  try {
-    print('🟢 Checking getAccount for address: $address');
-
-    // Kiểm tra địa chỉ hợp lệ
-    if (!RegExp(r'^0x[a-fA-F0-9]{40}$').hasMatch(address)) {
-      print("🔴 Error: Invalid Ethereum address format!");
-      return {};
-    }
-
-    final ethAddress = EthereumAddress.fromHex(address);
-    print('🟢 EthereumAddress object created: $ethAddress');
-
-    final result = await _client.call(
-      contract: _contract,
-      function: _getAccount,
-      params: [ethAddress],
-    );
-
-    print('🟢 Raw result from contract: $result');
-
-    if (result.isEmpty || result.length != 2) {
-      print("🔴 getAccount: Unexpected result format");
-      return {};
-    }
-
-    print('🟢 Decoding data...');
-    final dynamic nameData = result[0];
-    final dynamic isRegisteredData = result[1];
-
-    print('🟢 Name Data Type: ${nameData.runtimeType}, Value: $nameData');
-    print('🟢 isRegistered Data Type: ${isRegisteredData.runtimeType}, Value: $isRegisteredData');
-
-    // Chuyển đổi dữ liệu về dạng mong đợi
-    String name = nameData.toString(); // Ép kiểu về String
-    bool isRegistered = isRegisteredData as bool;
-
-    return {'name': name, 'isRegistered': isRegistered};
-  } catch (e) {
-    print('🔴 getAccount error: $e');
-    return {};
-  }
-}
-
-
-  Future<List<String>> createAccount(String username) async {
-
+  Future<String> createAccount(String username) async {
     try {
-      final newCredentials = EthPrivateKey.createRandom(Random.secure());
-      final newAddress = newCredentials.address.hex;
-      final privateKeyHex =
-          bytesToHex(newCredentials.privateKey, include0x: false);
-
-      print(privateKeyHex);
-
-      print("Tạo tài khoản mới với địa chỉ e: $newAddress");
-
       final txHash = await _client.sendTransaction(
         _credentials,
         Transaction.callContract(
           contract: _contract,
           function: _createAccount,
-          parameters: [EthereumAddress.fromHex(newAddress), username],
+          parameters: [username],
           maxGas: 100000,
         ),
         chainId: 31337,
       );
-
-      print("Tạo tài khoản blockchain thành công, TX: $txHash");
-
-      String fixPrivateKey(String privateKeyHex) {
-        // Nếu dài hơn 64 ký tự, lấy 64 ký tự cuối cùng
-        return privateKeyHex.length > 64
-            ? privateKeyHex.substring(privateKeyHex.length - 64)
-            : privateKeyHex;
-      }
-
-      return ['$newAddress', '$privateKeyHex'];
+      print("Account created successfully, TX: $txHash");
+      return txHash;
     } catch (e) {
-      print("BlockchainService: Lỗi khi tạo tài khoản: $e");
-      return [];
+      print("BlockchainService: Error creating account: $e");
+      return "";
     }
   }
 
-  Future<BigInt> getBalance(String address) async {
+  Future<String> deposit(double amountInEth) async {
+    try {
+      final weiAmount = BigInt.from(amountInEth * 1000000000000000000);
+      final txHash = await _client.sendTransaction(
+        _credentials,
+        Transaction.callContract(
+          contract: _contract,
+          function: _deposit,
+          value: EtherAmount.fromBigInt(EtherUnit.wei, weiAmount),
+          maxGas: 100000,
+          parameters: [],
+        ),
+        chainId: 31337,
+      );
+      print("Deposit successful, TX: $txHash");
+      return txHash;
+    } catch (e) {
+      print("BlockchainService: Error depositing: $e");
+      return "";
+    }
+  }
+
+  Future<String> transfer(String recipientAddress, BigInt amountInEth) async {
+    try {
+      print('BlockchainService transfer $recipientAddress, $amountInEth');
+      final txHash = await _client.sendTransaction(
+        _credentials,
+        Transaction.callContract(
+          contract: _contract,
+          function: _transfer,
+          parameters: [
+            EthereumAddress.fromHex(recipientAddress),
+            amountInEth,
+          ],
+          value: EtherAmount.fromBigInt(EtherUnit.wei, amountInEth), // Gửi ETH qua value
+          maxGas: 100000,
+        ),
+        chainId: 31337,
+      );
+      print("Transfer successful, TX: $txHash");
+      return txHash;
+    } catch (e) {
+      print("BlockchainService: Error transferring: $e");
+      return "";
+    }
+  }
+
+  Future<BigInt> checkBalance() async {
     try {
       final result = await _client.call(
         contract: _contract,
         function: _getBalance,
-        params: [EthereumAddress.fromHex(address)],
+        params: [],
       );
-
-      return result[
-          0]; // Assuming getBalance returns a single BigInt value (balance in wei)
+      print("Balance retrieved: ${result[0]} wei");
+      return result[0] as BigInt;
     } catch (e) {
-      print('getBalance: $e');
+      print("BlockchainService: Error getting balance: $e");
       return BigInt.zero;
     }
   }
 
-  // 2️⃣ HÀM KIỂM TRA SỐ DƯ
-  Future<bool> checkBalance(String senderPrivateKey, double amount) async {
+  Future<BigInt> checkWalletBalance(String address) async {
     try {
-      EthereumAddress senderAddress =
-          getAddressFromPrivateKey(senderPrivateKey);
-
-      EtherAmount balance = await _client.getBalance(senderAddress);
-      EtherAmount gasPrice = await _client.getGasPrice();
-
-      // Tính toán tổng số tiền cần thiết (số ETH muốn gửi + phí giao dịch)
-      BigInt weiAmount = BigInt.from(amount * pow(10, 18));
-      BigInt totalCost = weiAmount + (gasPrice.getInWei * BigInt.from(21000));
-
-      if (balance.getInWei < totalCost) {
-        print("Lỗi: Số dư không đủ để thực hiện giao dịch.");
-        return false;
-      }
-
-      return true;
+      final balance = await _client.getBalance(EthereumAddress.fromHex(address));
+      print("Wallet balance of $address: ${EtherAmount.fromBigInt(EtherUnit.wei, balance.getInWei).getValueInUnit(EtherUnit.ether)} ETH");
+      return balance.getInWei;
     } catch (e) {
-      print("Lỗi khi kiểm tra số dư: $e");
-      return false;
+      print("Error getting wallet balance: $e");
+      return BigInt.zero;
     }
   }
 
-  Future<String> transferETH({
-    required String senderPrivateKey,
-    required String recipientAddress,
-    required double amount,
-  }) async {
+  Future<Map<String, dynamic>> checkBeforeTransfer(String recipientAddress, double amountInEth) async {
     try {
-      Credentials credentials = EthPrivateKey.fromHex(senderPrivateKey);
-      EthereumAddress senderAddress = credentials.address;
+      final weiAmount = BigInt.from(amountInEth * 1000000000000000000);
+      final senderAddress = _credentials.address.hex;
+      final walletBalance = await checkWalletBalance(senderAddress);
 
-      BigInt weiAmount = BigInt.from(amount * pow(10, 18));
-
-      bool hasEnoughBalance = await checkBalance(senderPrivateKey, amount);
-      if (!hasEnoughBalance) {
-        return "Số dư không đủ để thực hiện giao dịch.";
+      if (walletBalance < weiAmount) {
+        print("BlockchainService: Insufficient wallet balance. Required: $weiAmount wei, Available: $walletBalance wei");
+        return {'isSufficient': false, 'weiAmount': weiAmount};
       }
 
-      EtherAmount gasPrice = await _client.getGasPrice();
-      var gasEstimate = await _client.estimateGas(
-        sender: senderAddress,
-        to: EthereumAddress.fromHex(recipientAddress),
-        value: EtherAmount.fromBigInt(EtherUnit.wei, weiAmount),
-      );
+      final txHash = await transfer(recipientAddress, weiAmount);
+      if (txHash == "") {
+        print("BlockchainService: Transfer failed");
+        return {'isSufficient': false, 'weiAmount': weiAmount};
+      }
 
-      String txHash = await _client.sendTransaction(
-        credentials,
-        Transaction(
-          to: EthereumAddress.fromHex(recipientAddress),
-          from: senderAddress,
-          value: EtherAmount.fromBigInt(EtherUnit.wei, weiAmount),
-          gasPrice: gasPrice,
-          maxGas: gasEstimate.toInt(),
-        ),
-        chainId: 31337,
-      );
+      final walletBalanceAfter = await checkWalletBalance(senderAddress);
+      print('BlockchainService-checkBeforeTransfer-walletBalance: $walletBalanceAfter');
+      print('BlockchainService-checkBeforeTransfer: transfer done');
 
-      print("Giao dịch thành công! TX Hash: $txHash");
-      return txHash;
+      return {'isSufficient': true, 'weiAmount': weiAmount};
     } catch (e) {
-      print("Lỗi khi gửi giao dịch: $e");
-      return "Giao dịch thất bại";
+      print("BlockchainService: Error checking balance before transfer: $e");
+      return {'isSufficient': false, 'weiAmount': BigInt.zero};
     }
   }
 }

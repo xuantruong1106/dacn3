@@ -1,8 +1,11 @@
+// ignore_for_file: deprecated_member_use, avoid_print
+
 import 'package:dacn3/screens/user/transaction_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dacn3/connect/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dacn3/connect/blockchain_service.dart';
 
 class Home extends StatefulWidget {
   final int userId;
@@ -19,13 +22,15 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  final blockchainService =  BlockchainService();
+  late final BigInt walletBalanceAfter;
 
   @override
   void initState() {
     super.initState();
     dataUser = [];
     dataTransaction = [];
-
+    
     // Initialize animations
     _animationController = AnimationController(
       vsync: this,
@@ -50,12 +55,14 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
 
     _loadData();
+    
   }
 
   Future<void> _loadData() async {
     try {
       await getInfoUser();
       await getInfoTransaction();
+      walletBalanceAfter = await blockchainService.checkWalletBalance(dataUser[0]['card_number']);
     } finally {
       setState(() {
         _isLoading = false;
@@ -91,6 +98,8 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   })
               .toList();
         });
+
+
       }
     } catch (e) {
       _showErrorSnackBar('Failed to load user data');
@@ -456,7 +465,7 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 const Spacer(),
                 Text(
                   dataUser.isNotEmpty
-                      ? '\$${dataUser[0]['total_amount']}'
+                      ? '\$$walletBalanceAfter'
                       : '\$0.00',
                   style: GoogleFonts.inter(
                     fontSize: 28,
