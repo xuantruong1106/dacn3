@@ -450,16 +450,16 @@ RETURNS TABLE (
   icon TEXT,
   description TEXT,
   transaction_date TIMESTAMP,
-  status VARCHAR,
+  status VARCHAR
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT 
     t.id,
     t.type_transaction,
-	t.amount,
-	t.sender_name,
-	t.account_receiver,
+    t.amount,
+    t.sender_name,
+    t.account_receiver,
     t.name_receiver,
     c.name_category::VARCHAR,
     c.icon,
@@ -468,7 +468,7 @@ BEGIN
     'Completed'::VARCHAR as status
   FROM transactions t
   JOIN categories c ON t.category_id = c.id
-  WHERE t.id = transaction_id
+  WHERE t.id = transaction_id; -- Thêm dấu chấm phẩy còn thiếu ở đây
 END;
 $$ LANGUAGE plpgsql;
 

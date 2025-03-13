@@ -92,6 +92,24 @@ ALTER TABLE transactions
 DROP CONSTRAINT transactions_type_transaction_check;
 
 
+-- Create savings_accounts table if it doesn't exist
+CREATE TABLE IF NOT EXISTS savings_accounts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES accounts(id),
+  amount NUMERIC(10,2) NOT NULL,
+  interest_rate NUMERIC(5,2) NOT NULL,
+  term_months INTEGER NOT NULL,
+  start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  end_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  description TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index for faster queries
+CREATE INDEX IF NOT EXISTS idx_savings_accounts_user_id ON savings_accounts(user_id);
+
+
 
 
 
