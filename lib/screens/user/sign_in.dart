@@ -111,17 +111,18 @@ class _SignInScreenState extends State<SignInScreen>
 
   Future<void> createAccount() async {
     final txHash = await blockchainService.createAccount(receiverName);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Account created: $txHash")),
-    );
+    print('signin - createAccount - $txHash');
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text("Account created: $txHash")),
+    // );
   }
 
-  Future<void> deposit() async {
-    final txHash = await blockchainService.deposit(10.0);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Deposited: $txHash")),
-    );
-  }
+  // Future<void> deposit() async {
+  //   final txHash = await blockchainService.deposit(10.0);
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text("Deposited: $txHash")),
+  //   );
+  // }
 
   Future<bool> _checkUserAccount(String phone, String password) async {
     try {
@@ -138,7 +139,7 @@ class _SignInScreenState extends State<SignInScreen>
         _userId = results[0][0]; // Lưu trữ ID người dùng
         await getInfoUser();
         await createAccount();
-        await deposit();
+        // await deposit();
         return true;
         
       }

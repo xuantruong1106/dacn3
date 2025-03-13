@@ -228,24 +228,24 @@ class HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                     ],
                                   ),
                                 ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.05),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.search_rounded),
-                                    onPressed: () {},
-                                    color: Colors.black87,
-                                  ),
-                                ),
+                                // Container(
+                                //   decoration: BoxDecoration(
+                                //     color: Colors.white,
+                                //     borderRadius: BorderRadius.circular(12),
+                                //     boxShadow: [
+                                //       BoxShadow(
+                                //         color: Colors.black.withOpacity(0.05),
+                                //         blurRadius: 8,
+                                //         offset: const Offset(0, 4),
+                                //       ),
+                                //     ],
+                                //   ),
+                                //   child: IconButton(
+                                //     icon: const Icon(Icons.search_rounded),
+                                //     onPressed: () {},
+                                //     color: Colors.black87,
+                                //   ),
+                                // ),
                               ],
                             ),
                           ),

@@ -164,11 +164,6 @@ class _StatisticsScreenState extends State<StatisticsScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: const Color(0xFF4B5B98),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           'Statistics',
           style: GoogleFonts.inter(

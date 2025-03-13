@@ -152,11 +152,11 @@ class _MyCardsScreenState extends State<MyCardsScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: const Color(0xFF4B5B98),
-          onPressed: () => Navigator.pop(context),
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back_rounded),
+        //   color: const Color(0xFF4B5B98),
+        //   onPressed: () => Navigator.pop(context),
+        // ),
         title: Text(
           'My Cards',
           style: GoogleFonts.inter(

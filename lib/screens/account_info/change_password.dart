@@ -242,7 +242,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen>
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           color: const Color(0xFF4B5B98),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushReplacementNamed(context, '/main', arguments: widget.userId),
         ),
         title: Text(
           'Change Password',
