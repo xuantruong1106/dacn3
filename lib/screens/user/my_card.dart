@@ -490,7 +490,7 @@ class _MyCardsScreenState extends State<MyCardsScreen>
                     icon: dataTransaction[index]['icon'],
                     category: dataTransaction[index]['category_name'],
                     amount: dataTransaction[index]['transaction_amount'],
-                    isExpense: dataTransaction[index]['type_transaction'] == 1,
+                    isExpense: dataTransaction[index]['type_transaction'] == 0,
                   ),
                 ),
               )

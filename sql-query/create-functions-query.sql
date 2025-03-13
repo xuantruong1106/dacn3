@@ -498,16 +498,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
-<<<<<<< Updated upstream
 CREATE OR REPLACE FUNCTION update_user_info(
     p_id INT,
     p_username TEXT DEFAULT NULL,
     p_phone TEXT DEFAULT NULL,
     p_address TEXT DEFAULT NULL
 ) RETURNS BOOLEAN AS $$
-=======
-<<<<<<< HEAD
+
 CREATE OR REPLACE FUNCTION get_receivername(p_account_id INT)
 RETURNS TABLE(username TEXT, card_number TEXT) AS $$
 >>>>>>> Stashed changes
@@ -522,10 +519,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-<<<<<<< Updated upstream
-=======
-
-=======
 CREATE OR REPLACE FUNCTION update_user_info(
     p_id INT,
     p_username TEXT DEFAULT NULL,
@@ -542,6 +535,41 @@ BEGIN
     RETURN FOUND;
 END;
 $$ LANGUAGE plpgsql;
->>>>>>> origin/main
 
->>>>>>> Stashed changes
+
+CREATE OR REPLACE FUNCTION get_cards_by_account(p_id_account INTEGER)
+RETURNS TABLE (
+    id INTEGER,
+    card_number TEXT,
+    private_key TEXT,
+    total_amount NUMERIC
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT c.id, c.card_number, c.private_key, c.total_amount
+    FROM cards c
+    WHERE c.id_account = p_id_account;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION check_balance(account_id INTEGER, amount NUMERIC(23,0))
+RETURNS BOOLEAN AS $$
+DECLARE 
+    balance NUMERIC(23,0);
+BEGIN
+    -- Lấy tổng số dư của tài khoản
+    SELECT COALESCE(SUM(total_amount), 0) 
+    INTO balance
+    FROM cards
+    WHERE id_account = account_id;
+
+    -- Kiểm tra số dư có đủ không
+    IF balance >= amount THEN
+        RETURN TRUE;  -- Đủ tiền
+    ELSE
+        RETURN FALSE; -- Không đủ tiền
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+

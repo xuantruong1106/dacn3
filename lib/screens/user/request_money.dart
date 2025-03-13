@@ -220,7 +220,8 @@ Future<void> sendMoney(double _mount2) async{
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () {
-                        Navigator.pop(context);
+                         Navigator.pushReplacementNamed(context, '/main',
+              arguments: widget.userId);
                       },
                     ),
                   ),

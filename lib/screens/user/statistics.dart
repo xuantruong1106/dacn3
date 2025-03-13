@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, avoid_print, unnecessary_to_list_in_spreads
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -15,7 +17,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     with SingleTickerProviderStateMixin {
   Map<String, double> categoryPercentages = {};
   Map<String, Color> categoryColors = {};
-  double? totalAmount;
+  late BigInt totalAmount;
   String highestCategory = "";
   double highestPercentage = 0.0;
   bool _isLoading = true;
@@ -126,14 +128,17 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         }
       });
 
+      print('Transaction[0][3] type: ${transactions[0][3].runtimeType}');
+
       setState(() {
         categoryPercentages = percentages;
         highestCategory = maxCategory;
         highestPercentage = maxPercentage;
         categoryColors = colorMapping;
-        totalAmount = transactions.isNotEmpty
-            ? double.tryParse(transactions[0][3].toString())
-            : 0.0;
+        totalAmount = transactions.isNotEmpty && transactions[0][3] != null
+    ? BigInt.parse(transactions[0][3])
+    : BigInt.zero;
+
         _isLoading = false;
       });
 
@@ -244,7 +249,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              '\$${totalAmount?.toStringAsFixed(2) ?? '0.00'}',
+              '\$${totalAmount.toString()}',
               style: GoogleFonts.inter(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
