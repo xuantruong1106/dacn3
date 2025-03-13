@@ -2,9 +2,11 @@ import 'package:dacn3/screens/user/forgot_pass.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dacn3/connect/database_connect.dart';
+import 'package:dacn3/connect/blockchain_service.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dacn3/screens/user/forgot_pass.dart';
+
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -18,11 +20,13 @@ class _SignInScreenState extends State<SignInScreen>
   bool _isPasswordVisible = false;
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final blockchainService =  BlockchainService();
   int? _userId;
   bool _isLoading = false;
   String? _errorMessage;
 
   // Animation controllers
+  late String receiverName = '';
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -74,6 +78,52 @@ class _SignInScreenState extends State<SignInScreen>
     super.dispose();
   }
 
+  Future<void> getInfoUser() async {
+    try {
+      await DatabaseConnection().connect();
+      final results = await DatabaseConnection().executeQuery(
+        'select username from accounts where id = @id;',
+        substitutionValues: {'id': _userId },
+      );
+       if (results.isNotEmpty) {
+        setState(() {
+          receiverName = results.isNotEmpty ? results[0][0] as String: '';
+        });
+
+
+      }
+    } catch (e) {
+      _showErrorSnackBar('Failed to load user data');
+    }
+  }
+
+   void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(10),
+      ),
+    );
+  }
+
+  Future<void> createAccount() async {
+    final txHash = await blockchainService.createAccount(receiverName);
+    print('signin - createAccount - $txHash');
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text("Account created: $txHash")),
+    // );
+  }
+
+  // Future<void> deposit() async {
+  //   final txHash = await blockchainService.deposit(10.0);
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text("Deposited: $txHash")),
+  //   );
+  // }
+
   Future<bool> _checkUserAccount(String phone, String password) async {
     try {
       await DatabaseConnection().connect();
@@ -87,7 +137,11 @@ class _SignInScreenState extends State<SignInScreen>
 
       if (results.isNotEmpty && results[0][0] != null) {
         _userId = results[0][0]; // Lưu trữ ID người dùng
+        await getInfoUser();
+        await createAccount();
+        // await deposit();
         return true;
+        
       }
       return false;
     } catch (e) {
@@ -173,6 +227,7 @@ class _SignInScreenState extends State<SignInScreen>
       if (isValidUser) {
         // Add a small delay for better UX
         await Future.delayed(const Duration(milliseconds: 300));
+
         Navigator.pushReplacementNamed(context, '/main', arguments: _userId);
       } else {
         _showError('Incorrect phone number or password');

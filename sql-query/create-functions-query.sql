@@ -450,16 +450,16 @@ RETURNS TABLE (
   icon TEXT,
   description TEXT,
   transaction_date TIMESTAMP,
-  status VARCHAR,
+  status VARCHAR
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT 
     t.id,
     t.type_transaction,
-	t.amount,
-	t.sender_name,
-	t.account_receiver,
+    t.amount,
+    t.sender_name,
+    t.account_receiver,
     t.name_receiver,
     c.name_category::VARCHAR,
     c.icon,
@@ -468,10 +468,50 @@ BEGIN
     'Completed'::VARCHAR as status
   FROM transactions t
   JOIN categories c ON t.category_id = c.id
-  WHERE t.id = transaction_id
+  WHERE t.id = transaction_id; -- Thêm dấu chấm phẩy còn thiếu ở đây
 END;
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION get_receivername(p_account_id INT)
+RETURNS TABLE(username TEXT, card_number TEXT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT a.username, c.card_number
+    FROM accounts a
+    JOIN cards c ON a.id = c.id_account
+    WHERE a.id = p_account_id
+    LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION get_receivername(p_account_id INT)
+RETURNS TABLE(username TEXT, card_number TEXT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT a.username, c.card_number
+    FROM accounts a
+    JOIN cards c ON a.id = c.id_account
+    WHERE a.id = p_account_id
+    LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION get_receivername(p_account_id INT)
+RETURNS TABLE(username TEXT, card_number TEXT) AS $$
+BEGIN
+    UPDATE accounts
+    SET username = COALESCE(p_username, username),
+        phone = COALESCE(p_phone, phone),
+        address = COALESCE(p_address, address)
+    WHERE id = p_id;
+
+    RETURN FOUND;
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION update_user_info(
     p_id INT,
@@ -489,7 +529,6 @@ BEGIN
     RETURN FOUND;
 END;
 $$ LANGUAGE plpgsql;
-
 -- Create savings_accounts table if it doesn't exist
 CREATE TABLE IF NOT EXISTS savings_accounts (
   id SERIAL PRIMARY KEY,

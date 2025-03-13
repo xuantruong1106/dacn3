@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dacn3/connect/database_connect.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dacn3/connect/blockchain_service.dart';
 
 class MyCardsScreen extends StatefulWidget {
   final int userId;
@@ -17,6 +18,8 @@ class _MyCardsScreenState extends State<MyCardsScreen>
   late List<Map<String, dynamic>> dataUser;
   late List<Map<String, dynamic>> dataTransaction;
   bool _isLoading = true;
+  final blockchainService =  BlockchainService();
+  late final BigInt walletBalanceAfter;
 
   // Animation controllers
   late AnimationController _animationController;
@@ -59,6 +62,7 @@ class _MyCardsScreenState extends State<MyCardsScreen>
     try {
       await getInfoUser();
       await getInfoTransaction();
+      walletBalanceAfter = await blockchainService.checkWalletBalance(dataUser[0]['card_number']);
     } finally {
       setState(() {
         _isLoading = false;
@@ -148,11 +152,11 @@ class _MyCardsScreenState extends State<MyCardsScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: const Color(0xFF4B5B98),
-          onPressed: () => Navigator.pop(context),
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back_rounded),
+        //   color: const Color(0xFF4B5B98),
+        //   onPressed: () => Navigator.pop(context),
+        // ),
         title: Text(
           'My Cards',
           style: GoogleFonts.inter(
@@ -265,7 +269,7 @@ class _MyCardsScreenState extends State<MyCardsScreen>
                 const SizedBox(height: 16),
                 Text(
                   dataUser.isNotEmpty
-                      ? '\$${dataUser[0]['total_amount']}'
+                      ? '\$$walletBalanceAfter'
                       : '\$0.00',
                   style: GoogleFonts.inter(
                     fontSize: 24, // Smaller font

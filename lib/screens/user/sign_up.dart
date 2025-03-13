@@ -22,9 +22,6 @@ class _SignUpScreenState extends State<SignUpScreen>
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
-  // Blockchain service
-  final BlockchainService _blockchainService = BlockchainService();
-
   // Animation controllers
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -88,10 +85,8 @@ class _SignUpScreenState extends State<SignUpScreen>
   Future<bool> _registerUser(String name, String password, String cvv,
       String phone, String address) async {
     try {
-      await _blockchainService.init();
 
       List<String> userAddress = [];
-      userAddress = await _blockchainService.createAccount(name);
 
       if (userAddress.isEmpty) {
         return false;

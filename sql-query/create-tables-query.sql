@@ -23,7 +23,7 @@ CREATE TABLE cards (
     card_holder_name TEXT NOT NULL,
     pin TEXT,
     cvv TEXT NOT NULL,
-    total_amount NUMERIC(15, 2) DEFAULT 0.00,
+    total_amount NUMERIC(23, 0) DEFAULT 0.00,
     time_created TIMESTAMP DEFAULT NOW(),
     time_updated TIMESTAMP DEFAULT NOW(),
 	expiration_date TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '5 years');
@@ -37,8 +37,8 @@ CREATE TABLE savings (
     id serial PRIMARY KEY,
     id_account INT NOT NULL,
     goal_name TEXT NOT NULL,
-    goal_amount NUMERIC(15, 2) NOT NULL,
-    current_amount NUMERIC(15, 2) DEFAULT 0.00,
+    goal_amount NUMERIC(23, 0) NOT NULL,
+    current_amount NUMERIC(23, 0) DEFAULT 0.00,
     deadline TIMESTAMP,
     CONSTRAINT fk_account FOREIGN KEY (id_account) REFERENCES accounts (id) ON DELETE CASCADE
 );
@@ -78,7 +78,7 @@ CREATE TABLE transactions (
     name_receiver VARCHAR(255) NOT NULL,
     sender_id VARCHAR(255) NOT NULL,
     sender_name VARCHAR(255) NOT NULL,
-    amount NUMERIC(10, 2) NOT NULL CHECK (amount >= 0),
+    amount NUMERIC(23, 0) NOT NULL CHECK (amount >= 0),
     messages TEXT,
     timestamps TIMESTAMPTZ DEFAULT NOW(),
     category_id INT,
@@ -90,6 +90,24 @@ CREATE TABLE transactions (
 
 ALTER TABLE transactions
 DROP CONSTRAINT transactions_type_transaction_check;
+
+
+-- Create savings_accounts table if it doesn't exist
+CREATE TABLE IF NOT EXISTS savings_accounts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES accounts(id),
+  amount NUMERIC(23,0) NOT NULL,
+  interest_rate NUMERIC(5,2) NOT NULL,
+  term_months INTEGER NOT NULL,
+  start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  end_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  description TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index for faster queries
+CREATE INDEX IF NOT EXISTS idx_savings_accounts_user_id ON savings_accounts(user_id);
 
 
 

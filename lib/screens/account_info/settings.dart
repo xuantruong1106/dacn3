@@ -128,11 +128,6 @@ class _SettingsScreenState extends State<SettingsScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: const Color(0xFF4B5B98),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           'Settings',
           style: GoogleFonts.inter(
@@ -166,26 +161,26 @@ class _SettingsScreenState extends State<SettingsScreen>
               _buildSettingsSection(
                 title: 'General',
                 children: [
-                  _buildSettingItem(
-                    icon: Icons.language_rounded,
-                    title: 'Language',
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'English',
-                          style: GoogleFonts.inter(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(Icons.chevron_right_rounded,
-                            color: Colors.grey[400]),
-                      ],
-                    ),
-                    onTap: () {},
-                  ),
+                  // _buildSettingItem(
+                  //   icon: Icons.language_rounded,
+                  //   title: 'Language',
+                  //   trailing: Row(
+                  //     mainAxisSize: MainAxisSize.min,
+                  //     children: [
+                  //       Text(
+                  //         'English',
+                  //         style: GoogleFonts.inter(
+                  //           color: Colors.grey[600],
+                  //           fontSize: 14,
+                  //         ),
+                  //       ),
+                  //       const SizedBox(width: 8),
+                  //       Icon(Icons.chevron_right_rounded,
+                  //           color: Colors.grey[400]),
+                  //     ],
+                  //   ),
+                  //   onTap: () {},
+                  // ),
                   _buildSettingItem(
                     icon: Icons.person_rounded,
                     title: 'My Profile',
@@ -196,14 +191,14 @@ class _SettingsScreenState extends State<SettingsScreen>
                           arguments: widget.userId);
                     },
                   ),
-                  _buildSettingItem(
-                    icon: Icons.support_agent_rounded,
-                    title: 'Contact Us',
-                    trailing: Icon(Icons.chevron_right_rounded,
-                        color: Colors.grey[400]),
-                    onTap: () {},
-                    showDivider: false,
-                  ),
+                  // _buildSettingItem(
+                  //   icon: Icons.support_agent_rounded,
+                  //   title: 'Contact Us',
+                  //   trailing: Icon(Icons.chevron_right_rounded,
+                  //       color: Colors.grey[400]),
+                  //   onTap: () {},
+                  //   showDivider: false,
+                  // ),
                 ],
               ),
 
@@ -223,91 +218,91 @@ class _SettingsScreenState extends State<SettingsScreen>
                           arguments: widget.userId);
                     },
                   ),
-                  _buildSettingItem(
-                    icon: Icons.fingerprint_rounded,
-                    title: 'Biometric Authentication',
-                    trailing: Switch(
-                      value: _biometricEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          _biometricEnabled = value;
-                        });
-                      },
-                      activeColor: Colors.white,
-                      activeTrackColor: const Color(0xFF4B5B98),
-                      inactiveThumbColor: Colors.white,
-                      inactiveTrackColor: Colors.grey[300],
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _biometricEnabled = !_biometricEnabled;
-                      });
-                    },
-                  ),
-                  _buildSettingItem(
-                    icon: Icons.privacy_tip_rounded,
-                    title: 'Privacy Policy',
-                    trailing: Icon(Icons.chevron_right_rounded,
-                        color: Colors.grey[400]),
-                    onTap: () {},
-                    showDivider: false,
-                  ),
+                  // _buildSettingItem(
+                  //   icon: Icons.fingerprint_rounded,
+                  //   title: 'Biometric Authentication',
+                  //   trailing: Switch(
+                  //     value: _biometricEnabled,
+                  //     onChanged: (value) {
+                  //       setState(() {
+                  //         _biometricEnabled = value;
+                  //       });
+                  //     },
+                  //     activeColor: Colors.white,
+                  //     activeTrackColor: const Color(0xFF4B5B98),
+                  //     inactiveThumbColor: Colors.white,
+                  //     inactiveTrackColor: Colors.grey[300],
+                  //   ),
+                  //   onTap: () {
+                  //     setState(() {
+                  //       _biometricEnabled = !_biometricEnabled;
+                  //     });
+                  //   },
+                  // ),
+                  // _buildSettingItem(
+                  //   icon: Icons.privacy_tip_rounded,
+                  //   title: 'Privacy Policy',
+                  //   trailing: Icon(Icons.chevron_right_rounded,
+                  //       color: Colors.grey[400]),
+                  //   onTap: () {},
+                  //   showDivider: false,
+                  // ),
                 ],
               ),
 
               const SizedBox(height: 24),
 
-              // Preferences
-              _buildSettingsSection(
-                title: 'Preferences',
-                children: [
-                  _buildSettingItem(
-                    icon: Icons.notifications_rounded,
-                    title: 'Notifications',
-                    trailing: Switch(
-                      value: _notificationsEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          _notificationsEnabled = value;
-                        });
-                      },
-                      activeColor: Colors.white,
-                      activeTrackColor: const Color(0xFF4B5B98),
-                      inactiveThumbColor: Colors.white,
-                      inactiveTrackColor: Colors.grey[300],
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _notificationsEnabled = !_notificationsEnabled;
-                      });
-                    },
-                  ),
-                  _buildSettingItem(
-                    icon: Icons.dark_mode_rounded,
-                    title: 'Dark Mode',
-                    trailing: Switch(
-                      value: _darkModeEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          _darkModeEnabled = value;
-                        });
-                      },
-                      activeColor: Colors.white,
-                      activeTrackColor: const Color(0xFF4B5B98),
-                      inactiveThumbColor: Colors.white,
-                      inactiveTrackColor: Colors.grey[300],
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _darkModeEnabled = !_darkModeEnabled;
-                      });
-                    },
-                    showDivider: false,
-                  ),
-                ],
-              ),
+              // // Preferences
+              // _buildSettingsSection(
+              //   title: 'Preferences',
+              //   children: [
+              //     _buildSettingItem(
+              //       icon: Icons.notifications_rounded,
+              //       title: 'Notifications',
+              //       trailing: Switch(
+              //         value: _notificationsEnabled,
+              //         onChanged: (value) {
+              //           setState(() {
+              //             _notificationsEnabled = value;
+              //           });
+              //         },
+              //         activeColor: Colors.white,
+              //         activeTrackColor: const Color(0xFF4B5B98),
+              //         inactiveThumbColor: Colors.white,
+              //         inactiveTrackColor: Colors.grey[300],
+              //       ),
+              //       onTap: () {
+              //         setState(() {
+              //           _notificationsEnabled = !_notificationsEnabled;
+              //         });
+              //       },
+              //     ),
+              //     _buildSettingItem(
+              //       icon: Icons.dark_mode_rounded,
+              //       title: 'Dark Mode',
+              //       trailing: Switch(
+              //         value: _darkModeEnabled,
+              //         onChanged: (value) {
+              //           setState(() {
+              //             _darkModeEnabled = value;
+              //           });
+              //         },
+              //         activeColor: Colors.white,
+              //         activeTrackColor: const Color(0xFF4B5B98),
+              //         inactiveThumbColor: Colors.white,
+              //         inactiveTrackColor: Colors.grey[300],
+              //       ),
+              //       onTap: () {
+              //         setState(() {
+              //           _darkModeEnabled = !_darkModeEnabled;
+              //         });
+              //       },
+              //       showDivider: false,
+              //     ),
+              //   ],
+              // ),
 
-              const SizedBox(height: 24),
+              // const SizedBox(height: 24),
 
               // About Section
               _buildSettingsSection(
