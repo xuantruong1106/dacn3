@@ -192,7 +192,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
 
         final savingsId = savingsResult[0][0];
 
-        final card_id = DatabaseConnection().executeQuery(
+        final card_id = await DatabaseConnection().executeQuery(
           '''
           SELECT id FROM cards WHERE id_account = @user_id
           ''',
@@ -201,7 +201,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
           },
         );
 
-        print(card_id);
+        print(card_id[0][0]);
 
         final categoryResult = await DatabaseConnection().executeQuery(
           'SELECT id FROM categories WHERE name_category = @category_name LIMIT 1',
@@ -220,20 +220,23 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
         await DatabaseConnection().executeQuery(
           '''
           INSERT INTO transactions 
-          (type_transaction, transaction_hash, sender_id, sender_name, amount, 
-           messages, timestamp, category_id, card_id)
+          (type_transaction, transaction_hash, account_receiver, name_receiver, sender_id, sender_name, amount, 
+           messages, timestamps, category_id, card_id)
           VALUES 
-          (1, @transaction_hash, @sender_id, 'Savings Deposit', @amount, 
+          (1, @transaction_hash, @account_receiver, @name_receiver, @sender_id, 'Savings Deposit', @amount, 
            @messages, CURRENT_TIMESTAMP, 
-            @category_id)
+            @category_id, @card_id)
           ''',
           substitutionValues: {
             'transaction_hash': 'SAV${DateTime.now().millisecondsSinceEpoch}',
             'sender_id': widget.userId.toString(),
             'amount': amount,
+            'account_receiver': savingsId,
+            'name_receiver': 'Savings Account',
             'messages':
                 'Savings deposit: ${_selectedTermMonths} month with interest ${_interestRate}%',
             'category_id': categoryId,
+            'card_id': (await card_id)[0][0],
             'user_id': widget.userId,
           },
         );
@@ -241,7 +244,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
         // 3. Update user's balance
         await DatabaseConnection().executeQuery(
           '''
-          UPDATE card 
+          UPDATE cards 
           SET total_amount = total_amount - @amount
           WHERE id_account = @user_id
           ''',
@@ -316,7 +319,8 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           color: const Color(0xFF4B5B98),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushReplacementNamed(context, '/loan',
+              arguments: {'userId': widget.userId}),
         ),
         title: Text(
           'Deposit savings',
