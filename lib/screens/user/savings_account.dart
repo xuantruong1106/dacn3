@@ -107,21 +107,30 @@ class _SavingsAccountsScreenState extends State<SavingsAccountsScreen>
         substitutionValues: {'user_id': widget.userId},
       );
 
+      if (results.isEmpty) {
+        print('No savings accounts found');
+        return;
+      }
+
       setState(() {
         _savingsAccounts = results
             .map((row) => {
-                  'id': row[0],
-                  'amount': row[1],
-                  'interest_rate': row[2],
-                  'term_months': row[3],
-                  'start_date': row[4],
-                  'end_date': row[5],
-                  'description': row[6],
-                  'status': row[7],
+                  'id': row[0] as int,
+                  'amount': double.tryParse(row[1].toString()) ??
+                      0.0, // Ép kiểu an toàn
+                  'interest_rate': double.tryParse(row[2].toString()) ?? 0.0,
+                  'term_months': int.tryParse(row[3].toString()) ?? 0,
+                  'start_date': DateTime.tryParse(row[4].toString()) ??
+                      DateTime(2000, 1, 1),
+                  'end_date': DateTime.tryParse(row[5].toString()) ??
+                      DateTime(2000, 1, 1),
+                  'description': row[6]?.toString() ?? '',
+                  'status': row[7]?.toString() ?? 'unknown',
                 })
             .toList();
       });
     } catch (e) {
+      print('Error loading savings accounts: $e');
       _showErrorSnackBar('Failed to load savings accounts');
     }
   }
