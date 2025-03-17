@@ -223,7 +223,7 @@ class _SavingsDepositScreenState extends State<SavingsDepositScreen>
           (type_transaction, transaction_hash, account_receiver, name_receiver, sender_id, sender_name, amount, 
            messages, timestamps, category_id, card_id)
           VALUES 
-          (1, @transaction_hash, @account_receiver, @name_receiver, @sender_id, 'Savings Deposit', @amount, 
+          (0, @transaction_hash, @account_receiver, @name_receiver, @sender_id, 'Savings Deposit', @amount, 
            @messages, CURRENT_TIMESTAMP, 
             @category_id, @card_id)
           ''',
